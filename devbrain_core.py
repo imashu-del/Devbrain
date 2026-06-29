@@ -15,7 +15,28 @@ async def init_memory():
     cognee.config.system_root_directory(os.path.join(workspace_dir, ".cognee_system"))
     cognee.config.data_root_directory(os.path.join(workspace_dir, ".cognee_data"))
     
-    print(f"Cognee initialized. System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
+    # Expose Google Gemini configuration programmatically
+    llm_provider = os.getenv("LLM_PROVIDER", "gemini")
+    embedding_provider = os.getenv("EMBEDDING_PROVIDER", "gemini")
+    
+    cognee.config.set_llm_provider(llm_provider)
+    cognee.config.set_embedding_provider(embedding_provider)
+    cognee.config.set_embedding_dimensions(768)
+    
+    # If there's an API key in the env, pass it
+    llm_api_key = os.getenv("LLM_API_KEY")
+    if llm_api_key and "your_" not in llm_api_key:
+        cognee.config.set_llm_api_key(llm_api_key)
+        cognee.config.set_embedding_api_key(llm_api_key)
+        
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    if google_api_key and "your_" not in google_api_key:
+        os.environ["GOOGLE_API_KEY"] = google_api_key
+        cognee.config.set_llm_api_key(google_api_key)
+        cognee.config.set_embedding_api_key(google_api_key)
+
+    print(f"Cognee initialized with LLM={llm_provider}, Embeddings={embedding_provider} (768d).")
+    print(f"System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
@@ -54,33 +75,30 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        print("--- Cognee Local Memory Test ---")
+        print("--- Cognee Local Memory Test (Gemini Edition) ---")
         await init_memory()
         
-        api_key = os.getenv("LLM_API_KEY")
-        if not api_key or "your_openai_or_anthropic_key_here" in api_key:
-            print("\n[WARNING] LLM_API_KEY is not configured with a valid key in .env.")
-            print("Please set your OpenAI or Anthropic API key in .env to run the full end-to-end test.")
+        api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("LLM_API_KEY")
+        if not api_key or "your_gemini_api_key_here" in api_key:
+            print("\n[WARNING] GOOGLE_API_KEY / LLM_API_KEY is not configured with a valid key in .env.")
+            print("Please set your Gemini API key in .env to run the full end-to-end test.")
             print("Skipping LLM-dependent remember/recall steps.")
             return
             
-        print("\nStoring example architectural decision...")
+        print("\nStoring example memory...")
         try:
-            decision = "Switched authentication to JWT for container scalability"
-            await store_memory(decision)
-            print(f"Stored: '{decision}'")
-            
-            print("\nOptimizing memory...")
-            await optimize_memory()
+            memory_item = "DevBrain is powered by local Cognee + Gemini."
+            await store_memory(memory_item)
+            print(f"Stored: '{memory_item}'")
             
             print("\nQuerying memory...")
-            query = "What authentication mechanism is used?"
+            query = "How is DevBrain powered?"
             result = await query_memory(query)
             print(f"Query: '{query}'")
             print(f"Result:\n{result}")
             
         except Exception as e:
             print(f"\nTest execution failed: {e}")
-            print("Verify your API key has correct permissions and balance.")
+            print("Verify your Gemini API key has correct permissions and balance.")
             
     asyncio.run(run_test())
