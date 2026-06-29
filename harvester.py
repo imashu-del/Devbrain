@@ -48,6 +48,8 @@ class CodebaseHarvesterHandler(FileSystemEventHandler):
         asyncio.run_coroutine_threadsafe(self.process_change(filepath), self.loop)
 
     async def process_change(self, filepath):
+        if not os.path.exists(filepath):
+            return
         filename = os.path.basename(filepath)
         print(f"[Harvester] Processing change for: {filename}...")
 

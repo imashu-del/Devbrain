@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     // Run python to query captured memories in local Cognee database
     const pyCommand = `python -c "import asyncio, devbrain_core; print(asyncio.run(devbrain_core.query_memory('Codebase Watchdog Log, architectural constraints, engineering decisions')))"`;
     
-    exec(pyCommand, { cwd: parentDir }, (error, stdout, stderr) => {
+    exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Subprocess error: ${error}`);
         return res.status(200).json({ entries: getMockTimelineData() });
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     
     if (action === "optimize") {
       const pyCommand = `python -c "import asyncio, devbrain_core; asyncio.run(devbrain_core.init_memory()); asyncio.run(devbrain_core.optimize_memory())"`;
-      exec(pyCommand, { cwd: parentDir }, (error, stdout, stderr) => {
+      exec(pyCommand, { cwd: parentDir, timeout: 30000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
         if (error) {
           console.error(`Optimize error: ${error}`);
           return res.status(500).json({ error: error.message });
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     else if (action === "purge") {
       const targetDataset = dataset || "main_dataset";
       const pyCommand = `python -c "import asyncio, devbrain_core; asyncio.run(devbrain_core.init_memory()); asyncio.run(devbrain_core.purge_memory('${targetDataset}'))"`;
-      exec(pyCommand, { cwd: parentDir }, (error, stdout, stderr) => {
+      exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
         if (error) {
           console.error(`Purge error: ${error}`);
           return res.status(500).json({ error: error.message });

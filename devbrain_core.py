@@ -40,36 +40,52 @@ async def init_memory():
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
-    await cognee.remember(text_context)
+    try:
+        await cognee.remember(text_context)
+    except Exception as e:
+        print(f"Error in store_memory: {e}")
+        raise e
 
 async def query_memory(query: str) -> str:
     """Wraps await cognee.recall(query) to pull architecture data out."""
-    results = await cognee.recall(query_text=query)
-    
-    formatted_results = []
-    for result in results:
-        if hasattr(result, "text") and result.text:
-            formatted_results.append(result.text)
-        elif hasattr(result, "content") and result.content:
-            formatted_results.append(result.content)
-        elif hasattr(result, "answer") and result.answer:
-            formatted_results.append(result.answer)
-        elif isinstance(result, dict):
-            val = result.get("text") or result.get("content") or result.get("answer") or str(result)
-            formatted_results.append(val)
-        else:
-            formatted_results.append(str(result))
-            
-    return "\n".join(formatted_results)
+    try:
+        results = await cognee.recall(query_text=query)
+        
+        formatted_results = []
+        for result in results:
+            if hasattr(result, "text") and result.text:
+                formatted_results.append(result.text)
+            elif hasattr(result, "content") and result.content:
+                formatted_results.append(result.content)
+            elif hasattr(result, "answer") and result.answer:
+                formatted_results.append(result.answer)
+            elif isinstance(result, dict):
+                val = result.get("text") or result.get("content") or result.get("answer") or str(result)
+                formatted_results.append(val)
+            else:
+                formatted_results.append(str(result))
+                
+        return "\n".join(formatted_results)
+    except Exception as e:
+        print(f"Error in query_memory: {e}")
+        return ""
 
 async def optimize_memory():
     """Wraps await cognee.improve() to prune stale/duplicate nodes and balance graph weights."""
-    await cognee.improve()
+    try:
+        await cognee.improve()
+    except Exception as e:
+        print(f"Error in optimize_memory: {e}")
+        raise e
 
 async def purge_memory(dataset_name: str):
     """Wraps await cognee.forget(dataset_name) to wipe discarded prototyping runs."""
-    # Note: cognee.forget takes keyword-only arguments, so we pass dataset=dataset_name
-    await cognee.forget(dataset=dataset_name)
+    try:
+        # Note: cognee.forget takes keyword-only arguments, so we pass dataset=dataset_name
+        await cognee.forget(dataset=dataset_name)
+    except Exception as e:
+        print(f"Error in purge_memory: {e}")
+        raise e
 
 if __name__ == "__main__":
     import asyncio
