@@ -1,0 +1,3 @@
+cognee
+watchdog
+python-dotenv
