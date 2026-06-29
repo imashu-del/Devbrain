@@ -26,6 +26,7 @@ export default function Home() {
   const [notification, setNotification] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [mode, setMode] = useState("local");
+  const [providerName, setProviderName] = useState("gemini");
 
   // Fetch timeline data from local Cognee memory API
   const fetchTimeline = async () => {
@@ -35,6 +36,7 @@ export default function Home() {
       const data = await res.json();
       setTimeline(data.entries || []);
       setMode(data.mode || "local");
+      setProviderName(data.provider || "gemini");
       if (data.entries && data.entries.length > 0) {
         setSelectedEntry(data.entries[0]);
       }
@@ -109,6 +111,14 @@ export default function Home() {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
+            {/* Brain Matrix telemetry indicator block */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-905 border border-slate-800">
+              <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Brain Matrix:</span>
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 uppercase">
+                {providerName}
+              </span>
+            </div>
+
             {/* Engine Mode telemetry indicator block */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-905 border border-slate-800">
               <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Engine Mode:</span>

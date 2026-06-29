@@ -5,11 +5,67 @@ import dotenv
 # Load environment variables
 dotenv.load_dotenv()
 
+def safe_int_env(key: str, default: int) -> int:
+    val = os.getenv(key)
+    if not val or not val.strip():
+        return default
+    try:
+        return int(val)
+    except ValueError:
+        return default
+
 async def init_memory():
     """Initializes and runs internal cognee configurations."""
     # Ensure environment variables are loaded
     dotenv.load_dotenv()
     
+    # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "gemini" if not specified)
+    llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "gemini").strip().lower()
+    
+    # 2. Use a conditional mapping block to set the environment keys before initializing Cognee
+    if llm_choice == "gemini":
+        os.environ["LLM_PROVIDER"] = "gemini"
+        os.environ["LLM_MODEL"] = os.getenv("GEMINI_LLM_MODEL") or "gemini/gemini-2.5-flash"
+        os.environ["LLM_API_KEY"] = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY") or ""
+        os.environ["EMBEDDING_PROVIDER"] = "gemini"
+        os.environ["EMBEDDING_MODEL"] = os.getenv("GEMINI_EMBEDDING_MODEL") or "gemini/gemini-embedding-001"
+        cognee.config.set("embedding_dimensions", safe_int_env("GEMINI_EMBEDDING_DIMENSIONS", 768))
+        
+    elif llm_choice == "openai":
+        os.environ["LLM_PROVIDER"] = "openai"
+        os.environ["LLM_MODEL"] = os.getenv("OPENAI_LLM_MODEL") or "gpt-4o"
+        os.environ["LLM_API_KEY"] = os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY") or ""
+        os.environ["EMBEDDING_PROVIDER"] = "openai"
+        os.environ["EMBEDDING_MODEL"] = os.getenv("OPENAI_EMBEDDING_MODEL") or "text-embedding-3-large"
+        cognee.config.set("embedding_dimensions", safe_int_env("OPENAI_EMBEDDING_DIMENSIONS", 3072))
+        
+    elif llm_choice == "anthropic":
+        os.environ["LLM_PROVIDER"] = "anthropic"
+        os.environ["LLM_MODEL"] = os.getenv("ANTHROPIC_LLM_MODEL") or "claude-3-5-sonnet-latest"
+        os.environ["LLM_API_KEY"] = os.getenv("ANTHROPIC_API_KEY") or ""
+        os.environ["EMBEDDING_PROVIDER"] = "openai"  # Map to OpenAI embeddings for Anthropic hybrid traversal
+        os.environ["EMBEDDING_MODEL"] = os.getenv("ANTHROPIC_EMBEDDING_MODEL") or "text-embedding-3-large"
+        os.environ["EMBEDDING_API_KEY"] = os.getenv("OPENAI_API_KEY") or ""
+        cognee.config.set("embedding_dimensions", safe_int_env("ANTHROPIC_EMBEDDING_DIMENSIONS", 3072))
+        
+    elif llm_choice == "ollama":
+        os.environ["LLM_PROVIDER"] = "ollama"
+        os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL") or "llama3"
+        os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT") or "http://localhost:11434"
+        os.environ["EMBEDDING_PROVIDER"] = "ollama"
+        os.environ["EMBEDDING_MODEL"] = os.getenv("OLLAMA_EMBEDDING_MODEL") or "nomic-embed-text"
+        os.environ["EMBEDDING_ENDPOINT"] = f"{os.getenv('OLLAMA_ENDPOINT') or 'http://localhost:11434'}/api/embed"
+        cognee.config.set("embedding_dimensions", safe_int_env("OLLAMA_EMBEDDING_DIMENSIONS", 768))
+        
+    else:
+        raise ValueError(
+            f"Unsupported DEVBRAIN_LLM_PROVIDER '{llm_choice}'. Supported providers are 'gemini', 'openai', 'anthropic', 'ollama'."
+        )
+        
+    # 3. Log clean confirmation message
+    print(f"[DevBrain Init] Cognitive Engine configured successfully: {os.getenv('LLM_MODEL')}")
+    
+    # 4. Proceed with existing DEVBRAIN_MODE execution routing
     devbrain_mode = os.getenv("DEVBRAIN_MODE", "local").strip().lower()
     
     if devbrain_mode == "cloud":
@@ -28,7 +84,7 @@ async def init_memory():
             
         print("[DevBrain Cockpit] [Cloud] Mode set to CLOUD. Establishing encrypted pipe to Cognee Cloud...")
         await cognee.serve(url=cognee_service_url, api_key=cognee_api_key)
-    
+        
     elif devbrain_mode == "local":
         print("[DevBrain Cockpit] [Local] Mode set to LOCAL. Mounting local SQLite, LanceDB, and Kuzu Graph nodes...")
         
@@ -39,36 +95,28 @@ async def init_memory():
         
         cognee.config.set("system_root_directory", system_dir)
         cognee.config.set("data_root_directory", data_dir)
-        cognee.config.set("embedding_dimensions", 768)
         
-        # Expose Google Gemini configuration programmatically
-        llm_provider = os.getenv("LLM_PROVIDER", "gemini")
-        embedding_provider = os.getenv("EMBEDDING_PROVIDER", "gemini")
+        # Expose LLM/embedding configuration to Cognee
+        cognee.config.set_llm_provider(os.environ["LLM_PROVIDER"])
+        cognee.config.set_embedding_provider(os.environ["EMBEDDING_PROVIDER"])
         
-        cognee.config.set_llm_provider(llm_provider)
-        cognee.config.set_embedding_provider(embedding_provider)
-        
-        # If there's an API key in the env, pass it
-        llm_api_key = os.getenv("LLM_API_KEY")
+        # Pass API keys if present
+        llm_api_key = os.environ.get("LLM_API_KEY")
         if llm_api_key and "your_" not in llm_api_key:
             cognee.config.set_llm_api_key(llm_api_key)
-            cognee.config.set_embedding_api_key(llm_api_key)
             
-        google_api_key = os.getenv("GOOGLE_API_KEY")
-        if google_api_key and "your_" not in google_api_key:
-            os.environ["GOOGLE_API_KEY"] = google_api_key
-            cognee.config.set_llm_api_key(google_api_key)
-            cognee.config.set_embedding_api_key(google_api_key)
+        embedding_api_key = os.environ.get("EMBEDDING_API_KEY") or llm_api_key
+        if embedding_api_key and "your_" not in embedding_api_key:
+            cognee.config.set_embedding_api_key(embedding_api_key)
 
-        print(f"Cognee initialized with LLM={llm_provider}, Embeddings={embedding_provider} (768d).")
-        print(f"System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
+        print(f"System directory set to: {system_dir}")
         
         # Check if a real key is present
         has_real_key = (
             (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
-            (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10)
+            (os.environ.get("GOOGLE_API_KEY") and "your_" not in os.environ.get("GOOGLE_API_KEY", "") and len(os.environ.get("GOOGLE_API_KEY", "")) > 10)
         )
-        if not has_real_key:
+        if not has_real_key and llm_choice == "gemini":
             print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
     else:
         raise ValueError(

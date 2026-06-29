@@ -6,19 +6,27 @@ import fs from "fs";
 export default async function handler(req, res) {
   const parentDir = path.join(process.cwd(), "..");
   
-  // Resolve DEVBRAIN_MODE directly from parent .env file or environment variables
+  // Resolve DEVBRAIN_MODE and DEVBRAIN_LLM_PROVIDER directly from parent .env file or environment variables
   let devbrainMode = "local";
+  let devbrainLLMProvider = "gemini";
   try {
     const envPath = path.join(parentDir, ".env");
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, "utf8");
-      const match = envContent.match(/DEVBRAIN_MODE=["']?(\w+)["']?/);
-      if (match) {
-        devbrainMode = match[1].trim().toLowerCase();
+      
+      const matchMode = envContent.match(/DEVBRAIN_MODE=["']?(\w+)["']?/);
+      if (matchMode) {
+        devbrainMode = matchMode[1].trim().toLowerCase();
+      }
+      
+      const matchProvider = envContent.match(/DEVBRAIN_LLM_PROVIDER=["']?(\w+)["']?/);
+      if (matchProvider) {
+        devbrainLLMProvider = matchProvider[1].trim().toLowerCase();
       }
     }
   } catch (err) {
     devbrainMode = process.env.DEVBRAIN_MODE || "local";
+    devbrainLLMProvider = process.env.DEVBRAIN_LLM_PROVIDER || "gemini";
   }
 
   if (req.method === "GET") {
@@ -28,17 +36,17 @@ export default async function handler(req, res) {
     exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Subprocess error: ${error}`);
-        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode });
+        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode, provider: devbrainLLMProvider });
       }
       
       const parsedEntries = parseTimeline(stdout);
       
       // If no entries are returned, merge with mock data for demonstration purposes
       if (parsedEntries.length === 0) {
-        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode });
+        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode, provider: devbrainLLMProvider });
       }
       
-      return res.status(200).json({ entries: parsedEntries, mode: devbrainMode });
+      return res.status(200).json({ entries: parsedEntries, mode: devbrainMode, provider: devbrainLLMProvider });
     });
   } 
   
