@@ -146,8 +146,8 @@ function getMockTimelineData() {
     {
       file: "devbrain_core.py",
       timestamp: new Date().toISOString(),
-      snippets: "cognee.config.set_llm_provider('gemini'), set_embedding_dimensions(768)",
-      diff: "+ cognee.config.set_llm_provider('gemini')\n+ cognee.config.set_embedding_provider('gemini')\n+ cognee.config.set_embedding_dimensions(768)"
+      snippets: "cognee.config.config.llm_provider = 'custom', cognee.config.config.embedding_provider = 'fastembed', set_embedding_dimensions(384)",
+      diff: "+ cognee.config.config.llm_provider = 'custom'\n+ cognee.config.config.embedding_provider = 'fastembed'\n+ cognee.config.config.embedding_dimensions = 384"
     },
     {
       file: "harvester.py",

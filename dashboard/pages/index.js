@@ -26,7 +26,7 @@ export default function Home() {
   const [notification, setNotification] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [mode, setMode] = useState("local");
-  const [providerName, setProviderName] = useState("gemini");
+  const [providerName, setProviderName] = useState("nemotron");
 
   // Fetch timeline data from local Cognee memory API
   const fetchTimeline = async () => {
@@ -36,7 +36,7 @@ export default function Home() {
       const data = await res.json();
       setTimeline(data.entries || []);
       setMode(data.mode || "local");
-      setProviderName(data.provider || "gemini");
+      setProviderName(data.provider || "nemotron");
       if (data.entries && data.entries.length > 0) {
         setSelectedEntry(data.entries[0]);
       }
@@ -341,7 +341,7 @@ export default function Home() {
                 <div className="flex justify-between items-center bg-slate-950/50 p-3 rounded-xl border border-slate-900/50">
                   <span className="text-xs text-slate-400">AI Platform</span>
                   <span className="text-xs font-bold text-teal-300">
-                    {providerName === "nemotron" ? "NVIDIA NIM (Nemotron)" : providerName === "gemini" ? "Google Gemini" : providerName.toUpperCase()}
+                    {providerName === "nemotron" ? "NVIDIA NIM (Nemotron)" : providerName === "openai" ? "OpenAI GPT" : providerName.toUpperCase()}
                   </span>
                 </div>
               </div>

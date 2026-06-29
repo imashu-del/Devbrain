@@ -126,7 +126,7 @@ async def mock_acreate_structured_output(text_input, system_prompt, response_mod
             if "rating" in field_name.lower():
                 return "helpful"
             elif "answer" in field_name.lower() or "text" in field_name.lower() or "value" in field_name.lower():
-                return "DevBrain is powered by local Cognee + Gemini."
+                return "DevBrain is powered by local Cognee + Nemotron."
             else:
                 return "mock_string"
                 
@@ -188,12 +188,6 @@ async def init_memory():
         cognee.config.config.llm_api_key = os.getenv("OPENAI_API_KEY") or ""
         os.environ.pop("LLM_ENDPOINT", None)
         
-    elif llm_choice == "gemini":
-        cognee.config.config.llm_provider = "gemini"
-        cognee.config.config.llm_model = os.getenv("GEMINI_LLM_MODEL", "gemini-2.0-flash")
-        cognee.config.config.llm_api_key = os.getenv("GEMINI_API_KEY") or ""
-        os.environ.pop("LLM_ENDPOINT", None)
-        
     else:
         # Ensure non-Nemotron local or default cloud configurations map cleanly inside the else block.
         if llm_choice == "anthropic":
@@ -209,18 +203,18 @@ async def init_memory():
             os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL", "llama3")
             os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
         else:
-            # Default fallback to Gemini
-            cognee.config.config.llm_provider = "gemini"
-            cognee.config.config.llm_model = "gemini-2.0-flash"
-            cognee.config.config.llm_api_key = os.getenv("GEMINI_API_KEY") or ""
+            # Default fallback to OpenAI
+            cognee.config.config.llm_provider = "openai"
+            cognee.config.config.llm_model = "gpt-4o-mini"
+            cognee.config.config.llm_api_key = os.getenv("OPENAI_API_KEY") or ""
             os.environ.pop("LLM_ENDPOINT", None)
 
-    # Ensure non-Nemotron local or default cloud configurations map cleanly to gemini/768 embeddings
+    # Ensure non-Nemotron local or default cloud configurations map cleanly to OpenAI embeddings
     if not (is_local and llm_choice == "nemotron") and llm_choice != "ollama":
-        cognee.config.config.embedding_provider = "gemini"
-        cognee.config.config.embedding_model = "gemini/gemini-embedding-001"
-        cognee.config.config.embedding_api_key = os.getenv("GEMINI_API_KEY") or ""
-        cognee.config.config.embedding_dimensions = 768
+        cognee.config.config.embedding_provider = "openai"
+        cognee.config.config.embedding_model = "text-embedding-3-small"
+        cognee.config.config.embedding_api_key = os.getenv("OPENAI_API_KEY") or ""
+        cognee.config.config.embedding_dimensions = 1536
         
     # 3. Log clean confirmation message
     print(f"[DevBrain Init] Cognitive Engine configured successfully: {cognee.config.config.llm_model}")
@@ -326,8 +320,8 @@ async def init_memory():
         from cognee.infrastructure.llm.LLMGateway import LLMGateway
         LLMGateway.acreate_structured_output = mock_acreate_structured_output
         
-        if llm_choice == "gemini":
-            print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
+        if llm_choice == "openai":
+            print("[DevBrain Warning] No valid OpenAI API key found in .env. Memory pipeline runs will default to local mock modes.")
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
@@ -386,7 +380,7 @@ async def query_memory(query: str) -> str:
             return "\n".join(formatted_results)
         except Exception as retry_e:
             print(f"Error in mock recall retry: {retry_e}")
-            return "DevBrain is powered by local Cognee + Gemini."
+            return "DevBrain is powered by local Cognee + Nemotron."
 
 async def optimize_memory():
     """Wraps await cognee.improve() to prune stale/duplicate nodes and balance graph weights."""
@@ -409,7 +403,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        print("--- Cognee Local Memory Test (Gemini Edition) ---")
+        print("--- Cognee Local Memory Test (Nemotron Edition) ---")
         # Force mock environment parameters for offline testing
         os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
         os.environ["MOCK_EMBEDDING"] = "true"
@@ -422,7 +416,7 @@ if __name__ == "__main__":
         
         print("\nStoring example memory...")
         try:
-            memory_item = "DevBrain is powered by local Cognee + Gemini."
+            memory_item = "DevBrain is powered by local Cognee + Nemotron."
             await store_memory(memory_item)
             print(f"Stored: '{memory_item}'")
             
@@ -432,7 +426,7 @@ if __name__ == "__main__":
             print(f"Query: '{query}'")
             # If mock result or empty, display the expected verified string
             if not result.strip() or "text=''" in result or "GRAPH_COMPLETION" in result or "Got it" in result:
-                result = "DevBrain is powered by local Cognee + Gemini."
+                result = "DevBrain is powered by local Cognee + Nemotron."
             print(f"Result:\n{result}")
             
         except Exception as e:
