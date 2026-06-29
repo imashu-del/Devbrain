@@ -86,34 +86,34 @@ async def init_memory():
     os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
     
     # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "nemotron" if not specified)
-    llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "nemotron").strip().strip('"').strip("'").lower()
+    llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "nemotron").strip().lower()
     
     # 2. Use a conditional mapping block to set the environment keys before initializing Cognee
     if llm_choice == "nemotron":
-        # Dedicated NVIDIA NIM native driver path
-        os.environ["LLM_PROVIDER"] = "nvidia_nim"
+        # 1. Use "custom" to pass Cognee's internal validation rules safely
+        os.environ["LLM_PROVIDER"] = "custom"
+        
+        # 2. Prepend the model name with the official LiteLLM provider identifier
         os.environ["LLM_MODEL"] = "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b"
+        
+        # 3. Supply the dedicated connection parameters for the NVIDIA API Catalog
         os.environ["NVIDIA_NIM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
         os.environ["LLM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
         os.environ["LLM_ENDPOINT"] = "https://integrate.api.nvidia.com/v1"
 
     elif llm_choice == "openai":
-        # Direct native OpenAI client driver path
         os.environ["LLM_PROVIDER"] = "openai"
         os.environ["LLM_MODEL"] = os.getenv("OPENAI_LLM_MODEL", "openai/gpt-4o-mini")
         os.environ["LLM_API_KEY"] = os.getenv("OPENAI_API_KEY") or ""
-        # Reset any leftovers from other drivers to prevent network confusion
         os.environ.pop("LLM_ENDPOINT", None)
 
     elif llm_choice == "anthropic":
-        # Direct native Anthropic client driver path
         os.environ["LLM_PROVIDER"] = "anthropic"
         os.environ["LLM_MODEL"] = os.getenv("ANTHROPIC_LLM_MODEL", "claude-3-5-sonnet-20241022")
         os.environ["LLM_API_KEY"] = os.getenv("ANTHROPIC_API_KEY") or ""
         os.environ.pop("LLM_ENDPOINT", None)
 
     elif llm_choice == "gemini":
-        # Direct native Google Gemini client driver path
         os.environ["LLM_PROVIDER"] = "gemini"
         os.environ["LLM_MODEL"] = os.getenv("GEMINI_LLM_MODEL", "gemini/gemini-2.0-flash")
         os.environ["LLM_API_KEY"] = os.getenv("GEMINI_API_KEY") or ""
@@ -137,7 +137,7 @@ async def init_memory():
     if llm_choice != "ollama":
         os.environ["EMBEDDING_PROVIDER"] = "gemini"
         os.environ["EMBEDDING_MODEL"] = "gemini/gemini-embedding-001"
-        os.environ["EMBEDDING_API_KEY"] = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY") or ""
+        os.environ["EMBEDDING_API_KEY"] = os.getenv("GEMINI_API_KEY") or ""
         cognee.config.set("embedding_dimensions", 768)
         
     # 3. Log clean confirmation message
