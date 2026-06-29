@@ -14,19 +14,19 @@ export default async function handler(req, res) {
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, "utf8");
       
-      const matchMode = envContent.match(/DEVBRAIN_MODE=["']?(\w+)["']?/);
+      const matchMode = envContent.match(/DEVBRAIN_MODE\s*=\s*["']?([\w-]+)["']?/);
       if (matchMode) {
-        devbrainMode = matchMode[1].trim().toLowerCase();
+        devbrainMode = matchMode[1].replace(/['"\r\n]/g, "").trim().toLowerCase();
       }
       
-      const matchProvider = envContent.match(/DEVBRAIN_LLM_PROVIDER=["']?(\w+)["']?/);
+      const matchProvider = envContent.match(/DEVBRAIN_LLM_PROVIDER\s*=\s*["']?([\w-]+)["']?/);
       if (matchProvider) {
-        devbrainLLMProvider = matchProvider[1].trim().toLowerCase();
+        devbrainLLMProvider = matchProvider[1].replace(/['"\r\n]/g, "").trim().toLowerCase();
       }
     }
   } catch (err) {
-    devbrainMode = process.env.DEVBRAIN_MODE || "local";
-    devbrainLLMProvider = process.env.DEVBRAIN_LLM_PROVIDER || "nemotron";
+    devbrainMode = (process.env.DEVBRAIN_MODE || "local").replace(/['"\r\n]/g, "").trim().toLowerCase();
+    devbrainLLMProvider = (process.env.DEVBRAIN_LLM_PROVIDER || "nemotron").replace(/['"\r\n]/g, "").trim().toLowerCase();
   }
 
   if (req.method === "GET") {
