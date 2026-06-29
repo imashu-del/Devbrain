@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import asyncio
+import subprocess
 import devbrain_core
 
 # Initialize Windows Terminal ANSI color support if on Windows
@@ -54,6 +55,12 @@ def main():
         help="Trigger Cognee memory improvement engine (improve) to balance graph node weights and prune stale memories."
     )
     
+    # command: dashboard
+    subparsers.add_parser(
+        "dashboard", 
+        help="Launch the Next.js interactive developer dashboard cockpit (local-first)."
+    )
+    
     args = parser.parse_args()
     
     if args.command == "init":
@@ -95,6 +102,25 @@ def main():
             print("[DevBrain] Local memory graph optimization and pruning completed successfully.")
         except Exception as e:
             print(f"[DevBrain] Optimization process failed: {e}")
+            sys.exit(1)
+            
+    elif args.command == "dashboard":
+        print("[DevBrain] Launching interactive developer cockpit (Next.js)...")
+        workspace_dir = os.path.dirname(os.path.abspath(__file__))
+        dashboard_dir = os.path.join(workspace_dir, "dashboard")
+        try:
+            # Check and install node dependencies if missing
+            if not os.path.exists(os.path.join(dashboard_dir, "node_modules")):
+                print("[DevBrain] node_modules not found in dashboard directory. Installing dependencies...")
+                subprocess.run("npm install", cwd=dashboard_dir, shell=True, check=True)
+            
+            print("[DevBrain] Starting dev server. Opening browser at http://localhost:3000...")
+            # Run dev server blocking, letting developers interact and see compilation logs
+            subprocess.run("npm run dev", cwd=dashboard_dir, shell=True, check=True)
+        except KeyboardInterrupt:
+            print("\n[DevBrain] Dashboard cockpit shut down.")
+        except Exception as e:
+            print(f"[DevBrain] Failed to start Next.js cockpit: {e}")
             sys.exit(1)
             
     else:
