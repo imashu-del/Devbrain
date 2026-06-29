@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   
   // Resolve DEVBRAIN_MODE and DEVBRAIN_LLM_PROVIDER directly from parent .env file or environment variables
   let devbrainMode = "local";
-  let devbrainLLMProvider = "gemini";
+  let devbrainLLMProvider = "nemotron";
   try {
     const envPath = path.join(parentDir, ".env");
     if (fs.existsSync(envPath)) {
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     devbrainMode = process.env.DEVBRAIN_MODE || "local";
-    devbrainLLMProvider = process.env.DEVBRAIN_LLM_PROVIDER || "gemini";
+    devbrainLLMProvider = process.env.DEVBRAIN_LLM_PROVIDER || "nemotron";
   }
 
   if (req.method === "GET") {

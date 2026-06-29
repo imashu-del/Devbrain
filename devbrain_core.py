@@ -79,11 +79,23 @@ async def init_memory():
     # Ensure environment variables are loaded
     dotenv.load_dotenv()
     
-    # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "gemini" if not specified)
-    llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "gemini").strip().lower()
+    # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "nemotron" if not specified)
+    llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "nemotron").strip().lower()
     
     # 2. Use a conditional mapping block to set the environment keys before initializing Cognee
-    if llm_choice == "gemini":
+    if llm_choice == "nemotron":
+        os.environ["LLM_PROVIDER"] = "custom"
+        os.environ["LLM_MODEL"] = os.getenv("NEMOTRON_LLM_MODEL", "nvidia/nemotron-3-ultra-550b-a55b")
+        os.environ["LLM_ENDPOINT"] = os.getenv("NEMOTRON_ENDPOINT", "https://integrate.api.nvidia.com/v1")
+        os.environ["LLM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
+        
+        # Secure embedding vector layer to LanceDB standard
+        os.environ["EMBEDDING_PROVIDER"] = "gemini"
+        os.environ["EMBEDDING_MODEL"] = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini/gemini-embedding-001")
+        os.environ["EMBEDDING_API_KEY"] = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY") or ""
+        cognee.config.set("embedding_dimensions", safe_int_env("GEMINI_EMBEDDING_DIMENSIONS", 768))
+
+    elif llm_choice == "gemini":
         os.environ["LLM_PROVIDER"] = "gemini"
         os.environ["LLM_MODEL"] = os.getenv("GEMINI_LLM_MODEL") or "gemini/gemini-2.5-flash"
         os.environ["LLM_API_KEY"] = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY") or ""
@@ -119,7 +131,7 @@ async def init_memory():
         
     else:
         raise ValueError(
-            f"Unsupported DEVBRAIN_LLM_PROVIDER '{llm_choice}'. Supported providers are 'gemini', 'openai', 'anthropic', 'ollama'."
+            f"Unsupported DEVBRAIN_LLM_PROVIDER '{llm_choice}'. Supported providers are 'nemotron', 'gemini', 'openai', 'anthropic', 'ollama'."
         )
         
     # 3. Log clean confirmation message
@@ -179,12 +191,14 @@ async def init_memory():
     google_api_key = os.getenv("GOOGLE_API_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
     anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+    nemotron_api_key = os.getenv("NEMOTRON_API_KEY")
     
     has_real_key = (
         (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
         (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10) or
         (openai_api_key and "your_" not in openai_api_key and len(openai_api_key) > 10) or
-        (anthropic_api_key and "your_" not in anthropic_api_key and len(anthropic_api_key) > 10)
+        (anthropic_api_key and "your_" not in anthropic_api_key and len(anthropic_api_key) > 10) or
+        (nemotron_api_key and "your_" not in nemotron_api_key and len(nemotron_api_key) > 10)
     )
     
     if not has_real_key and llm_choice != "ollama":
@@ -199,6 +213,8 @@ async def init_memory():
             os.environ["GOOGLE_API_KEY"] = "fake-api-key"
         if not os.environ.get("OPENAI_API_KEY") or "your_" in os.environ.get("OPENAI_API_KEY", ""):
             os.environ["OPENAI_API_KEY"] = "fake-api-key"
+        if not os.environ.get("NEMOTRON_API_KEY") or "your_" in os.environ.get("NEMOTRON_API_KEY", ""):
+            os.environ["NEMOTRON_API_KEY"] = "fake-api-key"
             
         # Override structured output generator to bypass network LLM calls
         from cognee.infrastructure.llm.LLMGateway import LLMGateway

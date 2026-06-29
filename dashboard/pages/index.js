@@ -115,7 +115,7 @@ export default function Home() {
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-905 border border-slate-800">
               <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Brain Matrix:</span>
               <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 uppercase">
-                {providerName}
+                {providerName === "nemotron" ? "🤖 NEMOTRON_3_ULTRA" : providerName}
               </span>
             </div>
 
