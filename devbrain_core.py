@@ -82,63 +82,61 @@ async def init_memory():
     # Disable LiteLLM retries to prevent hangs on invalid credentials
     os.environ["LITELLM_NUM_RETRIES"] = "0"
     
-    # Ensure connection verification checks are skipped globally
+    # Ensure preflight loops are disabled globally
     os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
     
     # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "nemotron" if not specified)
     llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "nemotron").strip().lower()
-    
-    # 2. Use a conditional mapping block to set the environment keys before initializing Cognee
+
     if llm_choice == "nemotron":
-        # 1. Use "custom" to pass Cognee's internal validation rules safely
+        # Explicitly use Cognee's runtime API to modify the active engine state
+        cognee.config.set("llm_provider", "custom")
+        cognee.config.set("llm_model", "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b")
+        cognee.config.set("llm_api_key", os.getenv("NEMOTRON_API_KEY") or "")
+        cognee.config.set("llm_endpoint", "https://integrate.api.nvidia.com/v1")
+        
+        # Mirror to os.environ as a fallback for LiteLLM's internal execution loops
         os.environ["LLM_PROVIDER"] = "custom"
-        
-        # 2. Prepend the model name with the official LiteLLM provider identifier
         os.environ["LLM_MODEL"] = "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b"
-        
-        # 3. Supply the dedicated connection parameters for the NVIDIA API Catalog
-        os.environ["NVIDIA_NIM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
         os.environ["LLM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
         os.environ["LLM_ENDPOINT"] = "https://integrate.api.nvidia.com/v1"
 
     elif llm_choice == "openai":
-        os.environ["LLM_PROVIDER"] = "openai"
-        os.environ["LLM_MODEL"] = os.getenv("OPENAI_LLM_MODEL", "openai/gpt-4o-mini")
-        os.environ["LLM_API_KEY"] = os.getenv("OPENAI_API_KEY") or ""
+        cognee.config.set("llm_provider", "openai")
+        cognee.config.set("llm_model", os.getenv("OPENAI_LLM_MODEL", "gpt-4o-mini"))
+        cognee.config.set("llm_api_key", os.getenv("OPENAI_API_KEY") or "")
         os.environ.pop("LLM_ENDPOINT", None)
 
     elif llm_choice == "anthropic":
-        os.environ["LLM_PROVIDER"] = "anthropic"
-        os.environ["LLM_MODEL"] = os.getenv("ANTHROPIC_LLM_MODEL", "claude-3-5-sonnet-20241022")
-        os.environ["LLM_API_KEY"] = os.getenv("ANTHROPIC_API_KEY") or ""
+        cognee.config.set("llm_provider", "anthropic")
+        cognee.config.set("llm_model", os.getenv("ANTHROPIC_LLM_MODEL", "claude-3-5-sonnet-20241022"))
+        cognee.config.set("llm_api_key", os.getenv("ANTHROPIC_API_KEY") or "")
         os.environ.pop("LLM_ENDPOINT", None)
 
     elif llm_choice == "gemini":
-        os.environ["LLM_PROVIDER"] = "gemini"
-        os.environ["LLM_MODEL"] = os.getenv("GEMINI_LLM_MODEL", "gemini/gemini-2.0-flash")
-        os.environ["LLM_API_KEY"] = os.getenv("GEMINI_API_KEY") or ""
+        cognee.config.set("llm_provider", "gemini")
+        cognee.config.set("llm_model", os.getenv("GEMINI_LLM_MODEL", "gemini-2.0-flash"))
+        cognee.config.set("llm_api_key", os.getenv("GEMINI_API_KEY") or "")
         os.environ.pop("LLM_ENDPOINT", None)
 
     elif llm_choice == "ollama":
+        cognee.config.set("llm_provider", "ollama")
+        cognee.config.set("llm_model", os.getenv("OLLAMA_LLM_MODEL", "llama3"))
+        cognee.config.set("llm_endpoint", os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434"))
         os.environ["LLM_PROVIDER"] = "ollama"
-        os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL") or "llama3"
-        os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT") or "http://localhost:11434"
-        os.environ["EMBEDDING_PROVIDER"] = "ollama"
-        os.environ["EMBEDDING_MODEL"] = os.getenv("OLLAMA_EMBEDDING_MODEL") or "nomic-embed-text"
-        os.environ["EMBEDDING_ENDPOINT"] = f"{os.getenv('OLLAMA_ENDPOINT') or 'http://localhost:11434'}/api/embed"
-        cognee.config.set("embedding_dimensions", safe_int_env("OLLAMA_EMBEDDING_DIMENSIONS", 768))
+        os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL", "llama3")
+        os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
 
     else:
         raise ValueError(
             f"Unsupported DEVBRAIN_LLM_PROVIDER '{llm_choice}'. Supported providers are 'nemotron', 'gemini', 'openai', 'anthropic', 'ollama'."
         )
 
-    # Keep the unified 768-dimension local embedding configuration standard underneath
-    if llm_choice != "ollama":
-        os.environ["EMBEDDING_PROVIDER"] = "gemini"
-        os.environ["EMBEDDING_MODEL"] = "gemini/gemini-embedding-001"
-        os.environ["EMBEDDING_API_KEY"] = os.getenv("GEMINI_API_KEY") or ""
-        cognee.config.set("embedding_dimensions", 768)
+    # Update the active embedding tracking parameters safely
+    cognee.config.set("embedding_provider", "gemini")
+    cognee.config.set("embedding_model", "gemini/gemini-embedding-001")
+    cognee.config.set("embedding_api_key", os.getenv("GEMINI_API_KEY") or "")
+    cognee.config.set("embedding_dimensions", 768)
         
     # 3. Log clean confirmation message
     print(f"[DevBrain Init] Cognitive Engine configured successfully: {os.getenv('LLM_MODEL')}")
@@ -173,22 +171,6 @@ async def init_memory():
         
         cognee.config.set("system_root_directory", system_dir)
         cognee.config.set("data_root_directory", data_dir)
-        
-        # Expose LLM/embedding configuration to Cognee
-        cognee.config.set_llm_provider(os.environ["LLM_PROVIDER"])
-        cognee.config.set_embedding_provider(os.environ["EMBEDDING_PROVIDER"])
-        
-        # Pass API keys if present
-        llm_api_key = os.environ.get("LLM_API_KEY")
-        if llm_api_key and "your" not in llm_api_key.lower():
-            cognee.config.set_llm_api_key(llm_api_key)
-            
-        embedding_api_key = os.environ.get("EMBEDDING_API_KEY")
-        if not embedding_api_key and os.environ.get("EMBEDDING_PROVIDER") == os.environ.get("LLM_PROVIDER"):
-            embedding_api_key = llm_api_key
-            
-        if embedding_api_key and "your" not in embedding_api_key.lower():
-            cognee.config.set_embedding_api_key(embedding_api_key)
 
         print(f"System directory set to: {system_dir}")
         
