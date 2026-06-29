@@ -1,4 +1,4 @@
-# 🧠 DevBrain: The Persistent Memory Layer for Software Development
+# 🧠 DevBrain: The Sovereign Memory Layer for Software Development
 > **Built for the Cognee 2026 Hackathon** — *Targeting the "Best Use of Open Source" Track*
 
 ---
@@ -13,56 +13,13 @@ Every time you open a new chat window, restart your IDE, or switch between codin
 
 **DevBrain fixes this by decoupling Memory (State) from the IDE/LLM (Compute).** 
 
-By running a local background harvester that continuously records file modifications, extracts diffs, and indexes them into **Cognee's** local knowledge graph (SQLite + LanceDB + Kuzu Graph), DevBrain serves as a local-first memory store. Any AI assistant can instantly hook into this memory layer to understand the codebase context.
+By running a local background harvester that continuously records file modifications, extracts diffs, and indexes them into **Cognee's** local knowledge graph (SQLite + LanceDB + Kuzu Graph) or Cognee Cloud, DevBrain serves as a persistent memory store. Any AI assistant can instantly hook into this memory layer to understand the codebase context.
 
 ---
 
-## 🧠 The Core Memory Lifecycle Map
+## 🎛️ The Hybrid Architecture Paradigm Shift
 
-DevBrain is powered entirely by the open-source **Cognee** SDK, orchestrating the local knowledge structure using its four core primitives:
-
-```
-                      +-------------------+
-                      |   File Watcher    |
-                      +---------+---------+
-                                |
-                                v (git diff)
-                      +-------------------+
-                      |  cognee.remember  |
-                      +---------+---------+
-                                |
-          +---------------------+---------------------+
-          |                                           |
-          v                                           v
-+-------------------+                       +-------------------+
-|   cognee.recall   |                       |   cognee.improve  |
-+---------+---------+                       +---------+---------+
-          |                                           |
-          v (prompt manifests)                        v (defrag)
-+-------------------+                       +-------------------+
-|  System Prompts   |                       |   Balanced Graph  |
-+-------------------+                       +-------------------+
-```
-
-### 1. `cognee.remember()`
-- **Role in DevBrain**: **Ingestion Engine.** Listens to active file modifications, extracts diffs, and feeds changes directly into the LanceDB vector space and SQLite metadata store.
-- **Method Signature**: `await cognee.remember(text_context: str)`
-
-### 2. `cognee.recall()`
-- **Role in DevBrain**: **Retrieval Engine.** Pulls structured memory segments, files touched, and architectural decisions to construct context manifests for prompts.
-- **Method Signature**: `await cognee.recall(query_text: str)`
-
-### 3. `cognee.improve()`
-- **Role in DevBrain**: **Graph Defragmenter.** Prunes stale or redundant nodes, re-evaluates schema connections, and re-balances graph weights to maintain a clean repository ontology.
-- **Method Signature**: `await cognee.improve()`
-
-### 4. `cognee.forget()`
-- **Role in DevBrain**: **Surgical Purge.** Discards prototyping runs or resets dataset trees when developers start a new branch or prototype iteration.
-- **Method Signature**: `await cognee.forget(dataset=dataset_name)`
-
----
-
-## 🏗️ Architecture & Component Overview
+DevBrain has evolved into a premium, sovereign developer engine that gives engineers complete control over both their storage topology (Hybrid Router) and their model intelligence layer (Cognitive Processor).
 
 ```
                       +---------------------------------------+
@@ -74,26 +31,59 @@ DevBrain is powered entirely by the open-source **Cognee** SDK, orchestrating th
             |  harvester.py (Watcher)   |   |   dashboard/ (Cockpit UI) |
             +-------------+-------------+   +-------------+-------------+
                           |                               |
-                          v (git diff)                    v (exec hooks)
+                          v (git diff)                    v (exec API)
             +-------------+-------------+   +-------------+-------------+
             | devbrain_core.py (Memory) |<--+ pages/api/memory.js (API) |
             +-------------+-------------+   +---------------------------+
                           |
-                          v
-            +-------------+-------------+
-            |     Local Cognee Store     |
-            | (SQLite + Kuzu + LanceDB) |
-            +---------------------------+
+             +------------+------------+
+             |                         |
+             v (DEVBRAIN_MODE=local)   v (DEVBRAIN_MODE=cloud)
+     +-------+-------+         +-------+-------+
+     | Local Kuzu DB |         | Cognee Cloud  |
+     +---------------+         +---------------+
 ```
 
-### 🛠️ Core Modules
-1. **[devbrain_core.py](file:///c:/Users/user/Downloads/Devbrain/devbrain_core.py)**: Configures Cognee to target local project directories (`.cognee_system` and `.cognee_data`) and integrates Gemini model and embedding sizes (768d).
-2. **[harvester.py](file:///c:/Users/user/Downloads/Devbrain/harvester.py)**: A background worker utilizing `watchdog` to monitor `.py, .js, .ts, .go, .md` files. It features a **1.5-second debounce buffer** to coalesce rapid IDE file writes and schedules asynchronous Git diff collections in thread pools.
-3. **[exporter.py](file:///c:/Users/user/Downloads/Devbrain/exporter.py)**: Queries memory to construct a dense project context manifest file ([devbrain_manifest.md](file:///c:/Users/user/Downloads/Devbrain/devbrain_manifest.md)) and copies it directly to the system clipboard.
-4. **[devbrain.py](file:///c:/Users/user/Downloads/Devbrain/devbrain.py)**: The CLI master controller. Exposes `init`, `watch`, `optimize`, `export`, and `dashboard` subcommands.
-5. **[dashboard/](file:///c:/Users/user/Downloads/Devbrain/dashboard/)**: A developer cockpit dashboard built using Next.js and Tailwind CSS:
-   - **Chronological Timeline**: Interactively displays files modified and expands code diff summaries.
-   - **Action Center**: Triggers graph defragmentation (`improve`) or database resets (`forget`) over API bridges.
+### 1. Storage Topology Router (`DEVBRAIN_MODE`)
+- **`local` (Default)**: Guarantees privacy-first isolation for secure internal repos. Operates 100% locally on embedded SQLite, LanceDB, and Kuzu Graph databases.
+- **`cloud`**: Establishes an encrypted, remote pipeline to Cognee Cloud via `cognee.serve()` for cross-device context synchronization.
+
+### 2. Cognitive Processor Layer (`DEVBRAIN_LLM_PROVIDER`)
+Developers can explicitly choose their underlying model matrix:
+- **`gemini` (Default)**: Connects to Google Gemini API (e.g. `gemini-2.5-flash`) utilizing 768-dimension vector embeddings.
+- **`openai`**: Routes to OpenAI models (e.g. `gpt-4o`) using 3072-dimension embeddings.
+- **`anthropic`**: Connects to Anthropic Claude models (e.g. `claude-3-5-sonnet`) while gracefully routing vector embedding pairs to OpenAI embedding models for hybrid traversal.
+- **`ollama`**: Runs 100% offline using local Ollama model engines and embedding dimensions.
+
+---
+
+## 🧠 The Core Memory Lifecycle Map
+
+DevBrain is powered entirely by the open-source **Cognee** SDK, orchestrating the local knowledge structure using its four core primitives:
+
+### 1. `cognee.remember()`
+- **Role**: **Ingestion Engine.** Listens to active file modifications, extracts diffs, and feeds changes directly into the vector space and SQLite metadata store.
+- **Method Signature**: `await cognee.remember(text_context: str)`
+
+### 2. `cognee.recall()`
+- **Role**: **Retrieval Engine.** Pulls structured memory segments, files touched, and architectural decisions to construct context manifests for prompts.
+- **Method Signature**: `await cognee.recall(query_text: str)`
+
+### 3. `cognee.improve()`
+- **Role**: **Graph Defragmenter.** Prunes stale or redundant nodes, re-evaluates schema connections, and re-balances graph weights to maintain a clean repository ontology.
+- **Method Signature**: `await cognee.improve()`
+
+### 4. `cognee.forget()`
+- **Role**: **Surgical Purge.** Discards prototyping runs or resets dataset trees when developers start a new branch or prototype iteration. Called with strict keyword arguments: `await cognee.forget(dataset=dataset_name)`
+
+---
+
+## 🛠️ Core Production Safeguards & Mitigations
+
+During our deep security and architectural audit, we implemented several key mitigations:
+- **Absolute Path Resolution**: Cognee local setups throw exceptions if paths are relative (e.g. `relative path can't be expressed as a file URI`). DevBrain dynamically resolves `./.cognee_system` and `./.data_storage` to their absolute forms before passing them to `cognee.config.set()`.
+- **CP1252 Encoding Protections**: Removed raw emojis from console prints within `devbrain_core.py` to prevent `UnicodeEncodeError` issues when developers execute subcommands inside default Windows shells.
+- **Process Isolation**: Spawns all subprocess shell hooks with 20-30 second timeouts and max buffer limits to ensure Next.js API routes never freeze or lock.
 
 ---
 
@@ -118,13 +108,40 @@ pip install -r requirements.txt
 ### 2. Configure Environment Variables
 Create a `.env` file in the project root:
 ```env
-LLM_PROVIDER="gemini"
-EMBEDDING_PROVIDER="gemini"
-LLM_API_KEY="your_google_gemini_api_key"
-GOOGLE_API_KEY="your_google_gemini_api_key"
+# Mode Settings: 'local' (offline) or 'cloud'
+DEVBRAIN_MODE="local"
+DEVBRAIN_LLM_PROVIDER="gemini"
+
+# --- Gemini Settings ---
+GEMINI_LLM_MODEL="gemini/gemini-2.5-flash"
+GEMINI_API_KEY="your_api_key_here"
+GEMINI_EMBEDDING_MODEL="gemini/gemini-embedding-001"
+GEMINI_EMBEDDING_DIMENSIONS="768"
+
+# --- OpenAI Settings ---
+OPENAI_LLM_MODEL="gpt-4o"
+OPENAI_API_KEY="your_openai_key_here"
+OPENAI_EMBEDDING_MODEL="text-embedding-3-large"
+OPENAI_EMBEDDING_DIMENSIONS="3072"
+
+# --- Anthropic Settings ---
+ANTHROPIC_LLM_MODEL="claude-3-5-sonnet-latest"
+ANTHROPIC_API_KEY="your_anthropic_key_here"
+ANTHROPIC_EMBEDDING_MODEL="text-embedding-3-large"
+ANTHROPIC_EMBEDDING_DIMENSIONS="3072"
+
+# --- Ollama Settings (100% Local LLM) ---
+OLLAMA_LLM_MODEL="llama3"
+OLLAMA_ENDPOINT="http://localhost:11434"
+OLLAMA_EMBEDDING_MODEL="nomic-embed-text"
+OLLAMA_EMBEDDING_DIMENSIONS="768"
+
+# --- Cognee Cloud Settings (Required only if DEVBRAIN_MODE="cloud") ---
+COGNEE_API_KEY="your_cognee_cloud_key"
+COGNEE_SERVICE_URL="your_cognee_cloud_endpoint"
 ```
 
-### 3. Initialize Cognee local DB
+### 3. Initialize Cognee DB
 Verify the database migrations and schema run successfully:
 ```bash
 python devbrain.py init
