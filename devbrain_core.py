@@ -10,41 +10,58 @@ async def init_memory():
     # Ensure environment variables are loaded
     dotenv.load_dotenv()
     
-    # Configure directories locally inside the workspace directory
-    workspace_dir = os.path.dirname(os.path.abspath(__file__))
-    cognee.config.system_root_directory(os.path.join(workspace_dir, ".cognee_system"))
-    cognee.config.data_root_directory(os.path.join(workspace_dir, ".cognee_data"))
+    cognee_api_key = os.getenv("COGNEE_API_KEY")
+    cognee_service_url = os.getenv("COGNEE_SERVICE_URL")
     
-    # Expose Google Gemini configuration programmatically
-    llm_provider = os.getenv("LLM_PROVIDER", "gemini")
-    embedding_provider = os.getenv("EMBEDDING_PROVIDER", "gemini")
-    
-    cognee.config.set_llm_provider(llm_provider)
-    cognee.config.set_embedding_provider(embedding_provider)
-    cognee.config.set_embedding_dimensions(768)
-    
-    # If there's an API key in the env, pass it
-    llm_api_key = os.getenv("LLM_API_KEY")
-    if llm_api_key and "your_" not in llm_api_key:
-        cognee.config.set_llm_api_key(llm_api_key)
-        cognee.config.set_embedding_api_key(llm_api_key)
-        
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if google_api_key and "your_" not in google_api_key:
-        os.environ["GOOGLE_API_KEY"] = google_api_key
-        cognee.config.set_llm_api_key(google_api_key)
-        cognee.config.set_embedding_api_key(google_api_key)
-
-    print(f"Cognee initialized with LLM={llm_provider}, Embeddings={embedding_provider} (768d).")
-    print(f"System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
-    
-    # Check if a real key is present
-    has_real_key = (
-        (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
-        (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10)
+    is_cloud_valid = (
+        cognee_api_key and "your_" not in cognee_api_key and len(cognee_api_key) > 5 and
+        cognee_service_url and "your_" not in cognee_service_url and len(cognee_service_url) > 5
     )
-    if not has_real_key:
-        print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
+    
+    if is_cloud_valid:
+        print("[DevBrain] [Cloud] Cognee Cloud configuration detected. Connecting to remote infrastructure...")
+        await cognee.serve(url=cognee_service_url, api_key=cognee_api_key)
+    else:
+        print("[DevBrain] [Local] No cloud key detected. Running 100% locally on embedded SQLite, LanceDB, and Kuzu Graph.")
+        
+        # Programmatic local setup hooks with absolute path resolution
+        workspace_dir = os.path.dirname(os.path.abspath(__file__))
+        system_dir = os.path.abspath(os.path.join(workspace_dir, ".cognee_system"))
+        data_dir = os.path.abspath(os.path.join(workspace_dir, ".data_storage"))
+        
+        cognee.config.set("system_root_directory", system_dir)
+        cognee.config.set("data_root_directory", data_dir)
+        cognee.config.set("embedding_dimensions", 768)
+        
+        # Expose Google Gemini configuration programmatically
+        llm_provider = os.getenv("LLM_PROVIDER", "gemini")
+        embedding_provider = os.getenv("EMBEDDING_PROVIDER", "gemini")
+        
+        cognee.config.set_llm_provider(llm_provider)
+        cognee.config.set_embedding_provider(embedding_provider)
+        
+        # If there's an API key in the env, pass it
+        llm_api_key = os.getenv("LLM_API_KEY")
+        if llm_api_key and "your_" not in llm_api_key:
+            cognee.config.set_llm_api_key(llm_api_key)
+            cognee.config.set_embedding_api_key(llm_api_key)
+            
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        if google_api_key and "your_" not in google_api_key:
+            os.environ["GOOGLE_API_KEY"] = google_api_key
+            cognee.config.set_llm_api_key(google_api_key)
+            cognee.config.set_embedding_api_key(google_api_key)
+
+        print(f"Cognee initialized with LLM={llm_provider}, Embeddings={embedding_provider} (768d).")
+        print(f"System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
+        
+        # Check if a real key is present
+        has_real_key = (
+            (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
+            (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10)
+        )
+        if not has_real_key:
+            print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
