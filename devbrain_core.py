@@ -6,6 +6,82 @@ import pydantic
 # Load environment variables
 dotenv.load_dotenv()
 
+# Proxy class to support direct attribute assignment on cognee.config.config
+class CogneeConfigProxy:
+    @property
+    def llm_provider(self):
+        from cognee.infrastructure.llm.config import get_llm_config
+        return get_llm_config().llm_provider
+    @llm_provider.setter
+    def llm_provider(self, val):
+        from cognee.infrastructure.llm.config import get_llm_config
+        get_llm_config().llm_provider = val
+
+    @property
+    def llm_model(self):
+        from cognee.infrastructure.llm.config import get_llm_config
+        return get_llm_config().llm_model
+    @llm_model.setter
+    def llm_model(self, val):
+        from cognee.infrastructure.llm.config import get_llm_config
+        get_llm_config().llm_model = val
+
+    @property
+    def llm_api_key(self):
+        from cognee.infrastructure.llm.config import get_llm_config
+        return get_llm_config().llm_api_key
+    @llm_api_key.setter
+    def llm_api_key(self, val):
+        from cognee.infrastructure.llm.config import get_llm_config
+        get_llm_config().llm_api_key = val
+
+    @property
+    def llm_endpoint(self):
+        from cognee.infrastructure.llm.config import get_llm_config
+        return get_llm_config().llm_endpoint
+    @llm_endpoint.setter
+    def llm_endpoint(self, val):
+        from cognee.infrastructure.llm.config import get_llm_config
+        get_llm_config().llm_endpoint = val
+
+    @property
+    def embedding_provider(self):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        return get_embedding_config().embedding_provider
+    @embedding_provider.setter
+    def embedding_provider(self, val):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        get_embedding_config().embedding_provider = val
+
+    @property
+    def embedding_model(self):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        return get_embedding_config().embedding_model
+    @embedding_model.setter
+    def embedding_model(self, val):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        get_embedding_config().embedding_model = val
+
+    @property
+    def embedding_dimensions(self):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        return get_embedding_config().embedding_dimensions
+    @embedding_dimensions.setter
+    def embedding_dimensions(self, val):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        get_embedding_config().embedding_dimensions = int(val) if val is not None else 0
+
+    @property
+    def embedding_api_key(self):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        return get_embedding_config().embedding_api_key
+    @embedding_api_key.setter
+    def embedding_api_key(self, val):
+        from cognee.infrastructure.databases.vector.embeddings.config import get_embedding_config
+        get_embedding_config().embedding_api_key = val
+
+cognee.config.config = CogneeConfigProxy()
+
 def safe_int_env(key: str, default: int) -> int:
     val = os.getenv(key)
     if not val or not val.strip():
@@ -85,61 +161,69 @@ async def init_memory():
     # Ensure preflight loops are disabled globally
     os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
     
-    # 1. Retrieve DEVBRAIN_LLM_PROVIDER (default to "nemotron" if not specified)
+    # 1. Retrieve DEVBRAIN_MODE and DEVBRAIN_LLM_PROVIDER
+    is_local = os.getenv("DEVBRAIN_MODE", "local").strip().strip('"').strip("'").lower() == "local"
     llm_choice = os.getenv("DEVBRAIN_LLM_PROVIDER", "nemotron").strip().lower()
 
-    if llm_choice == "nemotron":
-        # Explicitly use Cognee's runtime API to modify the active engine state
-        cognee.config.set("llm_provider", "custom")
-        cognee.config.set("llm_model", "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b")
-        cognee.config.set("llm_api_key", os.getenv("NEMOTRON_API_KEY") or "")
-        cognee.config.set("llm_endpoint", "https://integrate.api.nvidia.com/v1")
+    if is_local and llm_choice == "nemotron":
+        # --- Local Isolated Nemotron + Fastembed Architecture Stack ---
+        # Set global environment overrides to enforce custom LiteLLM routing rules
+        os.environ["OPENAI_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
+        os.environ["OPENAI_API_BASE"] = "https://integrate.api.nvidia.com/v1"
         
-        # Mirror to os.environ as a fallback for LiteLLM's internal execution loops
-        os.environ["LLM_PROVIDER"] = "custom"
-        os.environ["LLM_MODEL"] = "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b"
-        os.environ["LLM_API_KEY"] = os.getenv("NEMOTRON_API_KEY") or ""
-        os.environ["LLM_ENDPOINT"] = "https://integrate.api.nvidia.com/v1"
-
+        # Configure Cognee's internal settings manager directly
+        cognee.config.config.llm_provider = "custom"
+        cognee.config.config.llm_model = "openai/nvidia/nemotron-3-ultra-550b-a55b"
+        cognee.config.config.llm_api_key = os.getenv("NEMOTRON_API_KEY") or ""
+        cognee.config.config.llm_endpoint = "https://integrate.api.nvidia.com/v1"
+        
+        # Upgrade embedding parameters to 100% cloud-free local Fastembed (384 Dimensions)
+        cognee.config.config.embedding_provider = "fastembed"
+        cognee.config.config.embedding_model = "BAAI/bge-small-en-v1.5"
+        cognee.config.config.embedding_dimensions = 384
+   
     elif llm_choice == "openai":
-        cognee.config.set("llm_provider", "openai")
-        cognee.config.set("llm_model", os.getenv("OPENAI_LLM_MODEL", "gpt-4o-mini"))
-        cognee.config.set("llm_api_key", os.getenv("OPENAI_API_KEY") or "")
+        cognee.config.config.llm_provider = "openai"
+        cognee.config.config.llm_model = os.getenv("OPENAI_LLM_MODEL", "gpt-4o-mini")
+        cognee.config.config.llm_api_key = os.getenv("OPENAI_API_KEY") or ""
         os.environ.pop("LLM_ENDPOINT", None)
-
-    elif llm_choice == "anthropic":
-        cognee.config.set("llm_provider", "anthropic")
-        cognee.config.set("llm_model", os.getenv("ANTHROPIC_LLM_MODEL", "claude-3-5-sonnet-20241022"))
-        cognee.config.set("llm_api_key", os.getenv("ANTHROPIC_API_KEY") or "")
-        os.environ.pop("LLM_ENDPOINT", None)
-
+        
     elif llm_choice == "gemini":
-        cognee.config.set("llm_provider", "gemini")
-        cognee.config.set("llm_model", os.getenv("GEMINI_LLM_MODEL", "gemini-2.0-flash"))
-        cognee.config.set("llm_api_key", os.getenv("GEMINI_API_KEY") or "")
+        cognee.config.config.llm_provider = "gemini"
+        cognee.config.config.llm_model = os.getenv("GEMINI_LLM_MODEL", "gemini-2.0-flash")
+        cognee.config.config.llm_api_key = os.getenv("GEMINI_API_KEY") or ""
         os.environ.pop("LLM_ENDPOINT", None)
-
-    elif llm_choice == "ollama":
-        cognee.config.set("llm_provider", "ollama")
-        cognee.config.set("llm_model", os.getenv("OLLAMA_LLM_MODEL", "llama3"))
-        cognee.config.set("llm_endpoint", os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434"))
-        os.environ["LLM_PROVIDER"] = "ollama"
-        os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL", "llama3")
-        os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
-
+        
     else:
-        raise ValueError(
-            f"Unsupported DEVBRAIN_LLM_PROVIDER '{llm_choice}'. Supported providers are 'nemotron', 'gemini', 'openai', 'anthropic', 'ollama'."
-        )
+        # Ensure non-Nemotron local or default cloud configurations map cleanly inside the else block.
+        if llm_choice == "anthropic":
+            cognee.config.config.llm_provider = "anthropic"
+            cognee.config.config.llm_model = os.getenv("ANTHROPIC_LLM_MODEL", "claude-3-5-sonnet-20241022")
+            cognee.config.config.llm_api_key = os.getenv("ANTHROPIC_API_KEY") or ""
+            os.environ.pop("LLM_ENDPOINT", None)
+        elif llm_choice == "ollama":
+            cognee.config.config.llm_provider = "ollama"
+            cognee.config.config.llm_model = os.getenv("OLLAMA_LLM_MODEL", "llama3")
+            cognee.config.config.llm_endpoint = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
+            os.environ["LLM_PROVIDER"] = "ollama"
+            os.environ["LLM_MODEL"] = os.getenv("OLLAMA_LLM_MODEL", "llama3")
+            os.environ["LLM_ENDPOINT"] = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
+        else:
+            # Default fallback to Gemini
+            cognee.config.config.llm_provider = "gemini"
+            cognee.config.config.llm_model = "gemini-2.0-flash"
+            cognee.config.config.llm_api_key = os.getenv("GEMINI_API_KEY") or ""
+            os.environ.pop("LLM_ENDPOINT", None)
 
-    # Update the active embedding tracking parameters safely
-    cognee.config.set("embedding_provider", "gemini")
-    cognee.config.set("embedding_model", "gemini/gemini-embedding-001")
-    cognee.config.set("embedding_api_key", os.getenv("GEMINI_API_KEY") or "")
-    cognee.config.set("embedding_dimensions", 768)
+    # Ensure non-Nemotron local or default cloud configurations map cleanly to gemini/768 embeddings
+    if not (is_local and llm_choice == "nemotron") and llm_choice != "ollama":
+        cognee.config.config.embedding_provider = "gemini"
+        cognee.config.config.embedding_model = "gemini/gemini-embedding-001"
+        cognee.config.config.embedding_api_key = os.getenv("GEMINI_API_KEY") or ""
+        cognee.config.config.embedding_dimensions = 768
         
     # 3. Log clean confirmation message
-    print(f"[DevBrain Init] Cognitive Engine configured successfully: {os.getenv('LLM_MODEL')}")
+    print(f"[DevBrain Init] Cognitive Engine configured successfully: {cognee.config.config.llm_model}")
     
     # 4. Proceed with existing DEVBRAIN_MODE execution routing
     devbrain_mode = os.getenv("DEVBRAIN_MODE", "local").strip().strip('"').strip("'").lower()
@@ -169,8 +253,37 @@ async def init_memory():
         system_dir = os.path.abspath(os.path.join(workspace_dir, ".cognee_system"))
         data_dir = os.path.abspath(os.path.join(workspace_dir, ".data_storage"))
         
+        # Check dimension transition to safeguard LanceDB from schema mismatch crashes
+        dimension_file = os.path.join(data_dir, ".dimension")
+        last_dim = None
+        if os.path.exists(dimension_file):
+            try:
+                with open(dimension_file, "r") as f:
+                    last_dim = int(f.read().strip())
+            except Exception:
+                pass
+                
+        current_dim = cognee.config.config.embedding_dimensions
+        if last_dim is not None and last_dim != current_dim:
+            print(f"[DevBrain] Vector dimension transition detected ({last_dim}d -> {current_dim}d). Purging legacy database folders to prevent LanceDB collisions...")
+            import shutil
+            for folder in [system_dir, data_dir]:
+                if os.path.exists(folder):
+                    try:
+                        shutil.rmtree(folder)
+                    except Exception as err:
+                        print(f"Error purging folder {folder}: {err}")
+        
+        # Now set directories and ensure data directory exists to save current dimension
         cognee.config.set("system_root_directory", system_dir)
         cognee.config.set("data_root_directory", data_dir)
+        
+        os.makedirs(data_dir, exist_ok=True)
+        try:
+            with open(dimension_file, "w") as f:
+                f.write(str(current_dim))
+        except Exception:
+            pass
 
         print(f"System directory set to: {system_dir}")
         

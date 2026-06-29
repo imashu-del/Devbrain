@@ -114,9 +114,20 @@ export default function Home() {
             {/* Brain Matrix telemetry indicator block */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-905 border border-slate-800">
               <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Brain Matrix:</span>
-              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 uppercase">
-                {providerName === "nemotron" ? "🤖 NEMOTRON_3_ULTRA" : providerName}
-              </span>
+              {providerName === "nemotron" ? (
+                <>
+                  <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 uppercase flex items-center gap-1 animate-pulse">
+                    🤖 NEMOTRON_3_ULTRA
+                  </span>
+                  <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase flex items-center gap-1">
+                    ⚡ FASTEMBED (384d)
+                  </span>
+                </>
+              ) : (
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 uppercase">
+                  {providerName}
+                </span>
+              )}
             </div>
 
             {/* Engine Mode telemetry indicator block */}
@@ -330,7 +341,7 @@ export default function Home() {
                 <div className="flex justify-between items-center bg-slate-950/50 p-3 rounded-xl border border-slate-900/50">
                   <span className="text-xs text-slate-400">AI Platform</span>
                   <span className="text-xs font-bold text-teal-300">
-                    Google Gemini
+                    {providerName === "nemotron" ? "NVIDIA NIM (Nemotron)" : providerName === "gemini" ? "Google Gemini" : providerName.toUpperCase()}
                   </span>
                 </div>
               </div>
