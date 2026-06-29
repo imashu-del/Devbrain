@@ -37,6 +37,14 @@ async def init_memory():
 
     print(f"Cognee initialized with LLM={llm_provider}, Embeddings={embedding_provider} (768d).")
     print(f"System directory set to: {os.path.join(workspace_dir, '.cognee_system')}")
+    
+    # Check if a real key is present
+    has_real_key = (
+        (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
+        (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10)
+    )
+    if not has_real_key:
+        print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
@@ -129,22 +137,38 @@ if __name__ == "__main__":
     async def run_test():
         print("--- Cognee Local Memory Test (Gemini Edition) ---")
         
-        # Configure variables to skip connection verification and use mock embeddings
-        os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
-        os.environ["MOCK_EMBEDDING"] = "true"
+        # Check if a real key is present in the environment
+        llm_api_key = os.getenv("LLM_API_KEY")
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        has_real_key = (
+            (llm_api_key and "your_" not in llm_api_key and len(llm_api_key) > 10) or 
+            (google_api_key and "your_" not in google_api_key and len(google_api_key) > 10)
+        )
         
-        # Ensure dummy keys are present if not configured in .env
-        if not os.environ.get("LLM_API_KEY") or "your_" in os.environ.get("LLM_API_KEY", ""):
-            os.environ["LLM_API_KEY"] = "fake-gemini-key"
-        if not os.environ.get("GOOGLE_API_KEY") or "your_" in os.environ.get("GOOGLE_API_KEY", ""):
-            os.environ["GOOGLE_API_KEY"] = "fake-gemini-key"
+        if not has_real_key:
+            print("[DevBrain Test] No real API key detected. Running in mock/offline mode.")
+            # Configure variables to skip connection verification and use mock embeddings
+            os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "true"
+            os.environ["MOCK_EMBEDDING"] = "true"
+            
+            # Ensure dummy keys are present if not configured in .env
+            if not os.environ.get("LLM_API_KEY") or "your_" in os.environ.get("LLM_API_KEY", ""):
+                os.environ["LLM_API_KEY"] = "fake-gemini-key"
+            if not os.environ.get("GOOGLE_API_KEY") or "your_" in os.environ.get("GOOGLE_API_KEY", ""):
+                os.environ["GOOGLE_API_KEY"] = "fake-gemini-key"
+        else:
+            print("[DevBrain Test] Real API key detected. Contacting Gemini endpoint...")
+            # Ensure connection tests run when testing real endpoints
+            os.environ["COGNEE_SKIP_CONNECTION_TEST"] = "false"
+            os.environ.pop("MOCK_EMBEDDING", None)
             
         await init_memory()
         
-        # Override the LLM Gateway structured output function to bypass network LLM calls
-        from cognee.infrastructure.llm.LLMGateway import LLMGateway
-        LLMGateway.acreate_structured_output = mock_acreate_structured_output
-        
+        if not has_real_key:
+            # Override the LLM Gateway structured output function to bypass network LLM calls
+            from cognee.infrastructure.llm.LLMGateway import LLMGateway
+            LLMGateway.acreate_structured_output = mock_acreate_structured_output
+            
         print("\nStoring example memory...")
         try:
             memory_item = "DevBrain is powered by local Cognee + Gemini."
