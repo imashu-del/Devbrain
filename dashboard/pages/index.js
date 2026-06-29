@@ -25,6 +25,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [mode, setMode] = useState("local");
 
   // Fetch timeline data from local Cognee memory API
   const fetchTimeline = async () => {
@@ -33,6 +34,7 @@ export default function Home() {
       const res = await fetch("/api/memory");
       const data = await res.json();
       setTimeline(data.entries || []);
+      setMode(data.mode || "local");
       if (data.entries && data.entries.length > 0) {
         setSelectedEntry(data.entries[0]);
       }
@@ -106,12 +108,23 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Active Context Sync Status Banner */}
-          <div className="flex flex-wrap items-center gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl px-4 py-2.5">
-            <span className="text-xs text-slate-400 font-medium mr-2 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              Sync Engines:
-            </span>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Engine Mode telemetry indicator block */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-905 border border-slate-800">
+              <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Engine Mode:</span>
+              <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded ${
+                mode === "cloud" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+              }`}>
+                {mode === "cloud" ? "☁️ COGNEE_CLOUD" : "💻 LOCAL_OSS"}
+              </span>
+            </div>
+
+            {/* Active Context Sync Status Banner */}
+            <div className="flex flex-wrap items-center gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl px-4 py-2.5">
+              <span className="text-xs text-slate-400 font-medium mr-2 flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                Sync Engines:
+              </span>
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/50 text-emerald-400 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>

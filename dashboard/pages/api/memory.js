@@ -1,8 +1,25 @@
 import { exec } from "child_process";
 import path from "path";
 
+import fs from "fs";
+
 export default async function handler(req, res) {
   const parentDir = path.join(process.cwd(), "..");
+  
+  // Resolve DEVBRAIN_MODE directly from parent .env file or environment variables
+  let devbrainMode = "local";
+  try {
+    const envPath = path.join(parentDir, ".env");
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, "utf8");
+      const match = envContent.match(/DEVBRAIN_MODE=["']?(\w+)["']?/);
+      if (match) {
+        devbrainMode = match[1].trim().toLowerCase();
+      }
+    }
+  } catch (err) {
+    devbrainMode = process.env.DEVBRAIN_MODE || "local";
+  }
 
   if (req.method === "GET") {
     // Run python to query captured memories in local Cognee database
@@ -11,17 +28,17 @@ export default async function handler(req, res) {
     exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Subprocess error: ${error}`);
-        return res.status(200).json({ entries: getMockTimelineData() });
+        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode });
       }
       
       const parsedEntries = parseTimeline(stdout);
       
       // If no entries are returned, merge with mock data for demonstration purposes
       if (parsedEntries.length === 0) {
-        return res.status(200).json({ entries: getMockTimelineData() });
+        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode });
       }
       
-      return res.status(200).json({ entries: parsedEntries });
+      return res.status(200).json({ entries: parsedEntries, mode: devbrainMode });
     });
   } 
   

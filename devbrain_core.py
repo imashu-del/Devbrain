@@ -10,19 +10,27 @@ async def init_memory():
     # Ensure environment variables are loaded
     dotenv.load_dotenv()
     
-    cognee_api_key = os.getenv("COGNEE_API_KEY")
-    cognee_service_url = os.getenv("COGNEE_SERVICE_URL")
+    devbrain_mode = os.getenv("DEVBRAIN_MODE", "local").strip().lower()
     
-    is_cloud_valid = (
-        cognee_api_key and "your_" not in cognee_api_key and len(cognee_api_key) > 5 and
-        cognee_service_url and "your_" not in cognee_service_url and len(cognee_service_url) > 5
-    )
-    
-    if is_cloud_valid:
-        print("[DevBrain] [Cloud] Cognee Cloud configuration detected. Connecting to remote infrastructure...")
+    if devbrain_mode == "cloud":
+        cognee_api_key = os.getenv("COGNEE_API_KEY")
+        cognee_service_url = os.getenv("COGNEE_SERVICE_URL")
+        
+        is_cloud_valid = (
+            cognee_api_key and "your_" not in cognee_api_key and len(cognee_api_key) > 5 and
+            cognee_service_url and "your_" not in cognee_service_url and len(cognee_service_url) > 5
+        )
+        
+        if not is_cloud_valid:
+            raise ValueError(
+                "Explicit Cloud Mode requested (DEVBRAIN_MODE='cloud') but COGNEE_API_KEY or COGNEE_SERVICE_URL is missing/invalid in .env."
+            )
+            
+        print("[DevBrain Cockpit] [Cloud] Mode set to CLOUD. Establishing encrypted pipe to Cognee Cloud...")
         await cognee.serve(url=cognee_service_url, api_key=cognee_api_key)
-    else:
-        print("[DevBrain] [Local] No cloud key detected. Running 100% locally on embedded SQLite, LanceDB, and Kuzu Graph.")
+    
+    elif devbrain_mode == "local":
+        print("[DevBrain Cockpit] [Local] Mode set to LOCAL. Mounting local SQLite, LanceDB, and Kuzu Graph nodes...")
         
         # Programmatic local setup hooks with absolute path resolution
         workspace_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,6 +70,10 @@ async def init_memory():
         )
         if not has_real_key:
             print("[DevBrain Warning] No valid Gemini API key found in .env. Memory pipeline runs will default to local mock modes.")
+    else:
+        raise ValueError(
+            f"Invalid DEVBRAIN_MODE '{devbrain_mode}' specified. Supported modes are 'local' or 'cloud'."
+        )
 
 async def store_memory(text_context: str):
     """Wraps await cognee.remember(text_context) to ingest repository updates."""
