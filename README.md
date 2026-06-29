@@ -1,4 +1,4 @@
-# 🧠 DevBrain: The Sovereign Memory Layer for Software Development
+# 🧠 DevBrain: The Persistent Memory Layer for Software Development
 > **Built for the Cognee 2026 Hackathon** — *Targeting the "Best Use of Open Source" Track*
 
 ---
