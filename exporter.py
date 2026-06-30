@@ -81,6 +81,25 @@ async def export_context() -> str:
     except Exception as e:
         print(f"[Exporter] Error writing to {manifest_filename}: {e}")
 
+    # Write a copy to dashboard/public/devbrain_context.md for dashboard export
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        dashboard_pub_dir = os.path.join(base_dir, "dashboard", "public")
+        if os.path.exists(dashboard_pub_dir):
+            devbrain_context_path = os.path.join(dashboard_pub_dir, "devbrain_context.md")
+            with open(devbrain_context_path, "w", encoding="utf-8") as f:
+                f.write(manifest_content)
+            print(f"[Exporter] Successfully compiled and saved dashboard copy to: {devbrain_context_path}")
+        else:
+            alt_path = os.path.join("dashboard", "public", "devbrain_context.md")
+            alt_dir = os.path.dirname(alt_path)
+            if os.path.exists(alt_dir):
+                with open(alt_path, "w", encoding="utf-8") as f:
+                    f.write(manifest_content)
+                print(f"[Exporter] Successfully compiled and saved dashboard copy to: {alt_path}")
+    except Exception as e:
+        print(f"[Exporter] Error writing dashboard public copy: {e}")
+
     # Copy manifest content to the clipboard
     if copy_to_clipboard(manifest_content):
         print("[Exporter] Manifest copied directly to system clipboard.")

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import ExportCard from "../components/ExportCard";
 import { 
   Activity, 
   Cpu, 
@@ -346,6 +347,9 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            {/* CONTEXT EXPORT PANEL */}
+            <ExportCard />
 
             {/* ACTION CENTER */}
             <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm">
