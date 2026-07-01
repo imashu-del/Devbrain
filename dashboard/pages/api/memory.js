@@ -3,6 +3,37 @@ import path from "path";
 
 import fs from "fs";
 
+const checkHarvesterRunning = () => {
+  return new Promise((resolve) => {
+    const isWindows = process.platform === "win32";
+    const cmd = isWindows 
+      ? 'wmic process where "CommandLine like \'%harvester.py%\' or CommandLine like \'%devbrain.py watch%\'" get CommandLine,ProcessId'
+      : 'ps aux | grep -E "harvester.py|devbrain.py watch" | grep -v grep';
+    exec(cmd, (err, stdout) => {
+      if (err) {
+        resolve(false);
+        return;
+      }
+      if (isWindows) {
+        const lines = stdout.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        let count = 0;
+        for (const line of lines) {
+          if (line.includes('ProcessId') || line.includes('wmic') || line.includes('WMIC.exe')) {
+            continue;
+          }
+          if (line.includes('harvester.py') || line.includes('devbrain.py watch')) {
+            count++;
+          }
+        }
+        resolve(count > 0);
+      } else {
+        const lines = stdout.split('\n').filter(line => line.trim().length > 0);
+        resolve(lines.length > 0);
+      }
+    });
+  });
+};
+
 export default async function handler(req, res) {
   const parentDir = path.join(process.cwd(), "..");
   
@@ -30,23 +61,48 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
-    // Run python to query captured memories in local Cognee database
-    const pyCommand = `python -c "import asyncio, devbrain_core; print(asyncio.run(devbrain_core.query_memory('Codebase Watchdog Log, architectural constraints, engineering decisions')))"`;
+    const isHarvesting = await checkHarvesterRunning();
+    const scriptPath = path.join(parentDir, "get_dashboard_data.py");
+    const pyCommand = `python "${scriptPath}"`;
     
-    exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+    exec(pyCommand, { cwd: parentDir, timeout: 35000, maxBuffer: 1024 * 1024 * 5 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Subprocess error: ${error}`);
-        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode, provider: devbrainLLMProvider });
+        return res.status(200).json({ 
+          entries: getMockTimelineData(), 
+          mode: devbrainMode, 
+          provider: devbrainLLMProvider,
+          llmModel: devbrainLLMProvider === 'nemotron' ? 'openai/nvidia/nemotron-3-ultra-550b-a55b' : 'gpt-4o-mini',
+          embedding_provider: devbrainLLMProvider === 'nemotron' ? 'fastembed' : 'openai',
+          embedding_dimensions: devbrainLLMProvider === 'nemotron' ? 384 : 1536,
+          isHarvesting,
+          nodes: [],
+          edges: [],
+          files: []
+        });
       }
       
-      const parsedEntries = parseTimeline(stdout);
-      
-      // If no entries are returned, merge with mock data for demonstration purposes
-      if (parsedEntries.length === 0) {
-        return res.status(200).json({ entries: getMockTimelineData(), mode: devbrainMode, provider: devbrainLLMProvider });
+      try {
+        const data = JSON.parse(stdout.trim());
+        return res.status(200).json({
+          ...data,
+          isHarvesting
+        });
+      } catch (parseErr) {
+        console.error(`JSON Parse error: ${parseErr}`);
+        return res.status(200).json({
+          entries: getMockTimelineData(),
+          mode: devbrainMode,
+          provider: devbrainLLMProvider,
+          llmModel: devbrainLLMProvider === 'nemotron' ? 'openai/nvidia/nemotron-3-ultra-550b-a55b' : 'gpt-4o-mini',
+          embedding_provider: devbrainLLMProvider === 'nemotron' ? 'fastembed' : 'openai',
+          embedding_dimensions: devbrainLLMProvider === 'nemotron' ? 384 : 1536,
+          isHarvesting,
+          nodes: [],
+          edges: [],
+          files: []
+        });
       }
-      
-      return res.status(200).json({ entries: parsedEntries, mode: devbrainMode, provider: devbrainLLMProvider });
     });
   } 
   
