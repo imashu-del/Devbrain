@@ -34,4 +34,19 @@ body {
   animation: pulseGlow 1.8s infinite ease-in-out;
 }
 
+@keyframes pulseRadial {
+  0%, 100% {
+    box-shadow: 0 0 50px rgba(0, 242, 254, 0.08), inset 0 0 30px rgba(0, 242, 254, 0.02);
+    border-color: rgba(0, 242, 254, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 80px rgba(0, 242, 254, 0.22), inset 0 0 50px rgba(0, 242, 254, 0.08);
+    border-color: rgba(0, 242, 254, 0.35);
+  }
+}
+
+.animate-pulse-radial {
+  animation: pulseRadial 4s infinite ease-in-out;
+}
+
 

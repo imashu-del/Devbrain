@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FileText, Download, RefreshCw, CheckCircle2, Move, AlertTriangle } from "lucide-react";
 
-export default function ExportCard() {
+export default function ExportCard({ borderless = false }) {
   const [loading, setLoading] = useState(false);
   const [exportData, setExportData] = useState(null); // { filePath, content, size }
   const [error, setError] = useState(null);
@@ -55,7 +55,9 @@ export default function ExportCard() {
   };
 
   return (
-    <div className="border border-white/[0.05] bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-cinematic hover:border-white/[0.1] flex flex-col gap-4">
+    <div className={`bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-cinematic flex flex-col gap-4 hover:-translate-y-0.5 hover:shadow-[0_0_35px_rgba(0,242,254,0.08)] ${
+      borderless ? "border-0" : "border border-white/[0.05] hover:border-white/[0.1]"
+    }`}>
       <div>
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#00f2fe]" />
