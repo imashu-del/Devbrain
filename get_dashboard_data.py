@@ -166,6 +166,10 @@ async def get_dashboard_data():
             }
         ]
         
+    stitch_project_id = os.getenv("STITCH_PROJECT_ID", "").strip()
+    cursor_active = os.getenv("CURSOR_EXTENSION_ACTIVE", "false").strip().lower() == "true"
+    claude_active = os.getenv("CLAUDE_CODE_GATEWAY_ACTIVE", "false").strip().lower() == "true"
+
     return {
         "entries": parsed_entries,
         "mode": devbrain_mode,
@@ -175,7 +179,10 @@ async def get_dashboard_data():
         "embedding_dimensions": embedding_dimensions,
         "nodes": nodes,
         "edges": edges,
-        "files": files
+        "files": files,
+        "stitchProjectId": stitch_project_id,
+        "cursorActive": cursor_active,
+        "claudeActive": claude_active
     }
 
 if __name__ == "__main__":

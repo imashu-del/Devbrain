@@ -55,13 +55,13 @@ export default function ExportCard() {
   };
 
   return (
-    <div className="border border-white/[0.05] bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-all duration-300 hover:border-white/[0.1] flex flex-col gap-4">
+    <div className="border border-white/[0.05] bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-cinematic hover:border-white/[0.1] flex flex-col gap-4">
       <div>
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#00f2fe]" />
-          <span className="tracking-wider text-xs uppercase font-semibold text-white/40">Context Compiler</span>
+          <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Context Compiler</span>
         </h2>
-        <p className="text-[11px] text-white/50 mt-1">
+        <p className="text-[11px] text-white/40 mt-1">
           Compile active graph memory slice into a Markdown prompt manifest.
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function ExportCard() {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full bg-[#00f2fe] hover:bg-[#00f2fe]/80 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-300 shadow-[0_0_15px_rgba(0,242,254,0.1)] hover:shadow-[0_0_25px_rgba(0,242,254,0.2)]"
+          className="w-full bg-[#00f2fe] hover:bg-[#00f2fe]/80 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(0,242,254,0.1)] hover:shadow-[0_0_25px_rgba(0,242,254,0.2)]"
         >
           {loading ? (
             <>
@@ -97,14 +97,14 @@ export default function ExportCard() {
       {/* Draggable File Card */}
       {exportData && (
         <div className="flex flex-col gap-4 animate-fadeIn">
-          {/* File Card UI wrapper */}
+          {/* File Card UI wrapper (Physical glowing shard style) */}
           <div
             draggable="true"
             onDragStart={handleDragStart}
-            className={`group relative p-4 rounded-xl bg-white/[0.01] hover:bg-white/[0.06] border border-dashed cursor-grab active:cursor-grabbing transition-all duration-300 ease-out hover:-translate-y-0.5 flex items-center gap-4 ${
+            className={`group relative p-4 rounded-xl bg-white/[0.01] hover:bg-white/[0.06] border border-dashed cursor-grab active:cursor-grabbing transition-cinematic hover:-translate-y-1 flex items-center gap-4 ${
               dragged 
-                ? "border-[#00f2fe] bg-[#00f2fe]/5 shadow-[0_0_20px_rgba(0,242,254,0.15)]" 
-                : "border-white/[0.05] hover:border-[#00f2fe]/40 hover:shadow-[0_0_15px_rgba(0,242,254,0.05)]"
+                ? "border-[#00f2fe] bg-[#00f2fe]/5 shadow-[0_0_35px_rgba(0,242,254,0.15)]" 
+                : "border-white/[0.05] hover:border-[#00f2fe]/25 hover:shadow-[0_0_35px_rgba(0,242,254,0.08)]"
             }`}
             title="Drag me directly into your AI chat window (Claude, ChatGPT, Cursor, etc.)"
           >
@@ -139,7 +139,7 @@ export default function ExportCard() {
             <a
               href={exportData.filePath}
               download="devbrain_manifest.md"
-              className="flex-1 text-center bg-white/[0.02] hover:bg-white/[0.06] active:scale-[0.98] text-white border border-white/[0.05] font-semibold text-xs py-2.5 px-3 rounded-lg flex items-center justify-center gap-2 transition duration-300"
+              className="flex-1 text-center bg-white/[0.02] hover:bg-white/[0.06] active:scale-[0.98] text-white border border-white/[0.05] font-semibold text-xs py-2.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-cinematic"
             >
               <Download className="w-3.5 h-3.5" />
               Download File
@@ -149,7 +149,7 @@ export default function ExportCard() {
             <button
               onClick={handleExport}
               disabled={loading}
-              className="px-3 bg-white/[0.01] hover:bg-white/[0.06] border border-white/[0.05] text-white/60 hover:text-[#00f2fe] hover:border-[#00f2fe]/30 rounded-lg transition duration-300 active:scale-[0.98]"
+              className="px-3 bg-white/[0.01] hover:bg-white/[0.06] border border-white/[0.05] text-white/60 hover:text-[#00f2fe] hover:border-[#00f2fe]/30 rounded-lg transition-cinematic active:scale-[0.98]"
               title="Recompile context"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-500" : ""}`} />
