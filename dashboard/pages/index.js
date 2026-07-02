@@ -8,10 +8,136 @@ import {
   Trash2, 
   RefreshCw, 
   AlertTriangle,
-  CheckCircle2,
-  Globe,
-  Compass
+  CheckCircle2
 } from "lucide-react";
+import styled from 'styled-components';
+
+const CentralCoreTelemetry = ({ isHarvesting = true }) => {
+  return (
+    <div className="flex flex-col items-center justify-center space-y-4 select-none">
+      
+      {/* ======================================================================
+          RING 1: THE OUTER LOADING ACCELERATOR (Code 1)
+          ====================================================================== */}
+      <div className={`p-3 drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-60 md:h-60 h-44 w-44 aspect-square rounded-full flex items-center justify-center ${
+        isHarvesting ? 'animate-spin' : ''
+      }`}>
+        
+        {/* Inner core backing box containing the second ring layout */}
+        <div className="rounded-full h-full w-full bg-slate-100 dark:bg-zinc-900 backdrop-blur-md flex items-center justify-center">
+          
+          {/* ======================================================================
+              RING 2: THE TACTILE POWER SWITCH LINK (Code 2 - Nested Inside Ring 1)
+              ====================================================================== */}
+          <StyledWrapper>
+            <div className="container">
+              {/* Checkbox state binds dynamically to our system harvesting status */}
+              <input 
+                type="checkbox" 
+                id="devbrain-core-checkbox" 
+                checked={isHarvesting}
+                readOnly 
+              />
+              <label htmlFor="devbrain-core-checkbox" className="button">
+                <span className="icon">
+                  <svg 
+                    fill="currentColor" 
+                    viewBox="0 0 30.143 30.143" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    id="Capa_1" 
+                    version="1.1" 
+                    className="w-full h-full"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth={0} />
+                    <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
+                    <g id="SVGRepo_iconCarrier">
+                      <g>
+                        <path d="M20.034,2.357v3.824c3.482,1.798,5.869,5.427,5.869,9.619c0,5.98-4.848,10.83-10.828,10.83 c-5.982,0-10.832-4.85-10.832-10.83c0-3.844,2.012-7.215,5.029-9.136V2.689C4.245,4.918,0.731,9.945,0.731,15.801 c0,7.921,6.42,14.342,14.34,14.342c7.924,0,14.342-6.421,14.342-14.342C29.412,9.624,25.501,4.379,20.034,2.357z" />
+                        <path d="M14.795,17.652c1.576,0,1.736-0.931,1.736-2.076V2.08c0-1.148-0.16-2.08-1.736-2.08 c-1.57,0-1.732,0.932-1.732,2.08v13.496C13.062,16.722,13.225,17.652,14.795,17.652z" />
+                      </g>
+                    </g>
+                  </svg>
+                </span>
+              </label>
+            </div>
+          </StyledWrapper>
+
+        </div>
+      </div>
+
+      {/* Sub-label showing current tracking status string based on state */}
+      <div className="text-[10px] uppercase tracking-widest font-bold text-white/40 text-center">
+        {isHarvesting ? 'Active Tracking Enabled' : '• SYSTEM_IDLE'}
+      </div>
+    </div>
+  );
+};
+
+const StyledWrapper = styled.div`
+  .container {
+    width: 6em;
+    height: 6em;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .button {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid #041e42;
+    background-color: transparent;
+    background-image: linear-gradient(145deg, #0a2a5e, #1e4d8c);
+    box-sizing: border-box;
+    box-shadow:
+      inset 2px 2px 0 #2c5aa0,
+      inset -2px -2px 0px #041e42;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease;
+    cursor: pointer;
+  }
+  .container input {
+    display: none;
+  }
+  .button::before {
+    position: absolute;
+    content: "";
+    width: 6.25em;
+    height: 6.25em;
+    border-radius: inherit;
+    background-color: transparent;
+    background-image: linear-gradient(145deg, #0a2a5e, #2c5aa0);
+    z-index: -1;
+    box-shadow:
+      5px 5px 15px rgba(0,0,0,0.4),
+      -5px -5px 15px rgba(255,255,255,0.02);
+  }
+  .button .icon {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+  }
+  .button .icon svg {
+    height: 100%;
+    width: 100%;
+    fill: #a0c8ff;
+    transition: fill 0.5s ease;
+  }
+  .container input:checked + .button {
+    box-shadow:
+      inset -2px -2px 0 #2c5aa0,
+      inset 2px 2px 0 #041e42;
+    border-color: rgba(0, 242, 254, 1);
+  }
+  .container input:checked + .button .icon svg {
+    fill: rgb(0, 242, 254);
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.6));
+  }
+`;
 
 export default function Home() {
   const [timeline, setTimeline] = useState([]);
@@ -139,90 +265,24 @@ export default function Home() {
       </header>
 
       {/* CENTRAL CENTERPIECE CONNECTIVITY PORT */}
-      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl">
-        <div className="relative w-[480px] h-[480px] flex items-center justify-center">
-          
-          {/* Radial blur aura pulse glow */}
-          {isHarvesting && (
-            <div className="absolute w-[360px] h-[360px] rounded-full bg-[#00f2fe]/5 blur-3xl pointer-events-none animate-pulse-radial" />
-          )}
+      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl gap-6">
+        
+        {/* Radial blur aura pulse glow */}
+        {isHarvesting && (
+          <div className="absolute w-[360px] h-[360px] rounded-full bg-[#00f2fe]/5 blur-3xl pointer-events-none animate-pulse-radial z-0" />
+        )}
 
-          {/* THE CENTRAL CONNECTIVITY RING */}
-          <div className={`w-72 h-72 rounded-full border border-white/[0.05] bg-black/60 backdrop-blur-2xl flex flex-col justify-center items-center relative z-10 transition-cinematic ${
-            isHarvesting ? "animate-pulse-radial border-[#00f2fe]/30 shadow-[0_0_50px_rgba(0,242,254,0.08)]" : "shadow-[0_0_30px_rgba(255,255,255,0.01)]"
-          }`}>
-            <Cpu className={`w-8 h-8 mb-4 transition-cinematic ${isHarvesting ? "text-[#00f2fe] animate-pulse" : "text-white/20"}`} />
-            
-            <div className="text-center px-6">
-              {/* Force "Active Tracking Enabled" per user requested selection */}
-              <div className="text-[10px] uppercase tracking-widest text-[#00f2fe] font-bold">
-                Active Tracking Enabled
-              </div>
-              <div className="text-[8px] uppercase tracking-wider text-white/30 font-mono mt-2">
-                {isHarvesting ? "HARVESTER ACTIVE" : "STANDBY SYSTEM"} // {embeddingDimensions || 384}d NEURAL GRAPH
-              </div>
-            </div>
-          </div>
-
-          {/* ECOSYSTEM CONNECTION POINTS */}
-          
-          {/* Node 1: STITCH MCP (Left Branch) */}
-          <div className="absolute left-2 flex items-center gap-3 z-20">
-            <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-mono tracking-widest uppercase transition-cinematic ${
-              stitchProjectId 
-                ? "bg-gradient-to-r from-[#00f2fe] to-[#4facfe] bg-clip-text text-transparent border-[#00f2fe]/20 shadow-[0_0_20px_rgba(0,242,254,0.06)]" 
-                : "bg-white/[0.01] border-white/[0.03] text-white/20"
-            }`}>
-              STITCH MCP
-            </div>
-            <div className={`w-10 h-px transition-cinematic ${stitchProjectId ? "bg-[#00f2fe]/30" : "bg-white/[0.05]"}`} />
-          </div>
-
-          {/* Node 2: CURSOR IDE (Top Right Branch) */}
-          <div className="absolute -top-2 right-12 flex flex-col items-center gap-2 z-20">
-            <div className={`w-px h-10 transition-cinematic ${cursorActive ? "bg-[#00f2fe]/30" : "bg-white/[0.05]"}`} />
-            <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-mono tracking-widest uppercase transition-cinematic ${
-              cursorActive 
-                ? "bg-gradient-to-r from-[#00f2fe] to-[#4facfe] bg-clip-text text-transparent border-[#00f2fe]/20 shadow-[0_0_20px_rgba(0,242,254,0.06)]" 
-                : "bg-white/[0.01] border-white/[0.03] text-white/20"
-            }`}>
-              CURSOR IDE
-            </div>
-          </div>
-
-          {/* Node 3: CLAUDE CODE (Bottom Right Branch) */}
-          <div className="absolute -bottom-2 right-12 flex flex-col items-center gap-2 z-20">
-            <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-mono tracking-widest uppercase transition-cinematic ${
-              claudeActive 
-                ? "bg-gradient-to-r from-[#00f2fe] to-[#4facfe] bg-clip-text text-transparent border-[#00f2fe]/20 shadow-[0_0_20px_rgba(0,242,254,0.06)]" 
-                : "bg-white/[0.01] border-white/[0.03] text-white/20"
-            }`}>
-              CLAUDE CODE
-            </div>
-            <div className={`w-px h-10 transition-cinematic ${claudeActive ? "bg-[#00f2fe]/30" : "bg-white/[0.05]"}`} />
-          </div>
-
-          {/* Node 4: LOCAL WATCHER (Right Center Branch) */}
-          <div className="absolute right-2 flex items-center gap-3 z-20">
-            <div className={`w-10 h-px transition-cinematic ${isHarvesting ? "bg-[#00f2fe]/30" : "bg-white/[0.05]"}`} />
-            <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-mono tracking-widest uppercase transition-cinematic ${
-              isHarvesting 
-                ? "bg-gradient-to-r from-[#00f2fe] to-[#4facfe] bg-clip-text text-transparent border-[#00f2fe]/20 shadow-[0_0_20px_rgba(0,242,254,0.06)]" 
-                : "bg-white/[0.01] border-white/[0.03] text-white/20"
-            }`}>
-              LOCAL WATCHER
-            </div>
-          </div>
-
+        <div className="relative z-10">
+          <CentralCoreTelemetry isHarvesting={isHarvesting} />
         </div>
 
         {/* FLOATING ACTION GLASS SHARD (Export project matrix below ring) */}
-        <div className="mt-2 w-[340px] z-20">
+        <div className="w-[340px] z-20">
           <ExportCard borderless={true} />
         </div>
 
         {/* COMPACT MATRIX ACTION MATRIX BUTTONS */}
-        <div className="flex gap-4 mt-8 z-20">
+        <div className="flex gap-4 z-20">
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
