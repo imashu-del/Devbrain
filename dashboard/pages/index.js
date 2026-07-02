@@ -203,10 +203,10 @@ export default function Home() {
       {/* FLOATING ACTION BUTTON FOR CHRONOLOGY STREAM */}
       <button 
         onClick={() => setTickerOpen(true)}
-        className="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full border border-white/[0.08] bg-slate-950/50 backdrop-blur-xl flex items-center justify-center text-white/50 hover:text-[#00f2fe] hover:border-[#00f2fe]/40 hover:shadow-[0_0_20px_rgba(0,242,254,0.3)] transition-cinematic active:scale-95 cursor-pointer group shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+        className="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full border border-white/[0.08] bg-slate-950/50 backdrop-blur-xl flex items-center justify-center text-white/50 hover:text-[#00f2fe] hover:border-[#00f2fe]/40 hover:shadow-[0_0_20px_rgba(0,242,254,0.3)] transition-cinematic active:scale-95 cursor-pointer group shadow-[0_0_15px_rgba(0,0,0,0.5)]"
         title="Memory Slices Chronology"
       >
-        <Layers className="w-5 h-5 transition-transform group-hover:scale-110" />
+        <Layers className="w-4 h-4 transition-transform group-hover:scale-110" />
         
         {/* Sleek counter badge */}
         {timeline.length > 0 && (
