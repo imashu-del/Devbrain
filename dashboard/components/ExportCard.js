@@ -77,7 +77,7 @@ export default function ExportCard({ borderless = false }) {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full bg-white hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+          className="w-full bg-white hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-mono tracking-widest text-[10px] font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
         >
           {loading ? (
             <>
