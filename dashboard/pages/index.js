@@ -200,93 +200,120 @@ export default function Home() {
         </button>
       </footer>
 
-      {/* TICKER DRAWER ON THE BOTTOM EDGE */}
-      <div className={`fixed bottom-0 left-0 right-0 border-t border-white/[0.02] bg-[#050608]/95 backdrop-blur-2xl transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) z-40 ${tickerOpen ? 'h-[360px]' : 'h-8'}`}>
-        {/* Ticker Header */}
-        <div 
-          onClick={() => setTickerOpen(!tickerOpen)}
-          className="flex justify-between items-center px-6 h-8 cursor-pointer hover:bg-white/[0.01] transition-cinematic"
-        >
-          <div className="flex items-center gap-2">
-            <Layers className="w-3 h-3 text-white/40" />
-            <span className="text-[9px] uppercase tracking-widest text-white/40 font-bold">Memory Slices Chronology Stream</span>
-            <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono">
-              {timeline.length}
-            </span>
-          </div>
-          <div className="text-[9px] tracking-widest uppercase text-white/20 hover:text-white/60 transition-cinematic">
-            {tickerOpen ? "[- Collapse]" : "[+ Expand]"}
+      {/* FLOATING ACTION BUTTON FOR CHRONOLOGY STREAM */}
+      <button 
+        onClick={() => setTickerOpen(true)}
+        className="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full border border-white/[0.08] bg-slate-950/50 backdrop-blur-xl flex items-center justify-center text-white/50 hover:text-[#00f2fe] hover:border-[#00f2fe]/40 hover:shadow-[0_0_20px_rgba(0,242,254,0.3)] transition-cinematic active:scale-95 cursor-pointer group shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+        title="Memory Slices Chronology"
+      >
+        <Layers className="w-5 h-5 transition-transform group-hover:scale-110" />
+        
+        {/* Sleek counter badge */}
+        {timeline.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-[#00f2fe] text-[#07080a] text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-mono shadow-[0_0_8px_#00f2fe]">
+            {timeline.length}
+          </span>
+        )}
+      </button>
+
+      {/* FLOATING GLASSMORPHIC MODAL DIALOG */}
+      {tickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop overlay */}
+          <div 
+            onClick={() => setTickerOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+          />
+
+          {/* Floating Glassmorphic Window */}
+          <div className="relative w-full max-w-4xl bg-slate-950/75 border border-white/[0.08] backdrop-blur-2xl rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,242,254,0.15)] flex flex-col gap-4 animate-scaleUp z-10">
+            
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-white/50" />
+                <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold font-mono">Memory Slices Chronology Stream</span>
+                <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono">
+                  {timeline.length} TOTAL SLICES
+                </span>
+              </div>
+              <button 
+                onClick={() => setTickerOpen(false)}
+                className="text-[10px] font-mono tracking-widest uppercase text-white/30 hover:text-white/80 transition-cinematic bg-transparent border-0 cursor-pointer"
+              >
+                [ CLOSE ]
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
+              {/* Timeline list */}
+              <div className="flex flex-col max-h-full overflow-y-auto pr-4 border-r border-white/[0.05]">
+                {timeline.map((entry, idx) => {
+                  const isSelected = selectedEntry && selectedEntry.timestamp === entry.timestamp && selectedEntry.file === entry.file;
+                  return (
+                    <div 
+                      key={idx}
+                      onClick={() => setSelectedEntry(entry)}
+                      className={`py-2 px-1 border-b border-white/[0.03] last:border-b-0 cursor-pointer transition-cinematic flex flex-col gap-1 ${
+                        isSelected 
+                          ? "text-[#00f2fe]" 
+                          : "text-white/30 hover:text-white/60"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center text-[10px] font-mono">
+                        <div className="flex items-center gap-2 truncate max-w-[220px]">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-[#00f2fe] shadow-[0_0_8px_#00f2fe]" : "bg-white/10"}`} />
+                          <span className="font-bold truncate">{entry.file}</span>
+                        </div>
+                        <span className="text-[9px] opacity-60 font-mono">
+                          {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-[9px] opacity-40 line-clamp-1 font-mono pl-3.5">{entry.snippets}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Active Diff Details */}
+              <div className="max-h-full overflow-y-auto pr-2">
+                {selectedEntry ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-mono">
+                      DIFF PAYLOAD: {selectedEntry.file}
+                    </div>
+                    <div className="bg-[#030405]/60 border border-white/[0.04] rounded-lg p-4 font-mono text-[10px] max-h-[340px] overflow-auto leading-relaxed">
+                      <pre className="text-white/80">
+                        {selectedEntry.diff.split("\n").map((line, lIdx) => {
+                          let lineClass = "text-white/30";
+                          if (line.startsWith("+") && !line.startsWith("+++")) {
+                            lineClass = "text-emerald-400/80 bg-emerald-500/[0.04] px-1 py-0.5 rounded";
+                          } else if (line.startsWith("-") && !line.startsWith("---")) {
+                            lineClass = "text-rose-400 bg-rose-950/20 px-1 py-0.5 rounded";
+                          } else if (line.startsWith("@@")) {
+                            lineClass = "text-amber-500/80 font-bold";
+                          }
+                          return (
+                            <div key={lIdx} className={lineClass}>
+                              {line}
+                            </div>
+                          );
+                        })}
+                      </pre>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-widest text-white/30">
+                    Select a slice to inspect git payload
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
-        
-        {/* Ticker Content */}
-        {tickerOpen && (
-          <div className="p-6 h-[328px] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
-            {/* Timeline list */}
-            <div className="flex flex-col max-h-[280px] overflow-y-auto pr-4 border-r border-white/[0.05]">
-              {timeline.map((entry, idx) => {
-                const isSelected = selectedEntry && selectedEntry.timestamp === entry.timestamp && selectedEntry.file === entry.file;
-                return (
-                  <div 
-                    key={idx}
-                    onClick={() => setSelectedEntry(entry)}
-                    className={`py-2 px-1 border-b border-white/[0.03] last:border-b-0 cursor-pointer transition-cinematic flex flex-col gap-1 ${
-                      isSelected 
-                        ? "text-[#00f2fe]" 
-                        : "text-white/30 hover:text-white/60"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center text-[10px] font-mono">
-                      <div className="flex items-center gap-2 truncate max-w-[220px]">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-[#00f2fe] shadow-[0_0_8px_#00f2fe]" : "bg-white/10"}`} />
-                        <span className="font-bold truncate">{entry.file}</span>
-                      </div>
-                      <span className="text-[9px] opacity-60 font-mono">
-                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </span>
-                    </div>
-                    <p className="text-[9px] opacity-40 line-clamp-1 font-mono pl-3.5">{entry.snippets}</p>
-                  </div>
-                );
-              })}
-            </div>
-            
-            {/* Active Diff Details */}
-            <div className="max-h-[280px] overflow-y-auto pr-2">
-              {selectedEntry ? (
-                <div className="flex flex-col gap-2">
-                  <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-mono">
-                    DIFF PAYLOAD: {selectedEntry.file}
-                  </div>
-                  <div className="bg-[#030405]/60 border border-white/[0.04] rounded-lg p-4 font-mono text-[10px] max-h-[230px] overflow-auto leading-relaxed">
-                    <pre className="text-white/80">
-                      {selectedEntry.diff.split("\n").map((line, lIdx) => {
-                        let lineClass = "text-white/30";
-                        if (line.startsWith("+") && !line.startsWith("+++")) {
-                          lineClass = "text-emerald-400/80 bg-emerald-500/[0.04] px-1 py-0.5 rounded";
-                        } else if (line.startsWith("-") && !line.startsWith("---")) {
-                          lineClass = "text-rose-400 bg-rose-950/20 px-1 py-0.5 rounded";
-                        } else if (line.startsWith("@@")) {
-                          lineClass = "text-amber-500/80 font-bold";
-                        }
-                        return (
-                          <div key={lIdx} className={lineClass}>
-                            {line}
-                          </div>
-                        );
-                      })}
-                    </pre>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-widest text-white/30">
-                  Select a slice to inspect git payload
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
     </div>
   );
