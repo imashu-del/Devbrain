@@ -55,12 +55,12 @@ export default function ExportCard({ borderless = false }) {
   };
 
   return (
-    <div className={`bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-cinematic flex flex-col gap-4 hover:-translate-y-0.5 hover:shadow-[0_0_35px_rgba(0,242,254,0.08)] ${
+    <div className={`bg-white/[0.01] backdrop-blur-lg rounded-2xl p-6 transition-cinematic flex flex-col gap-4 hover:-translate-y-0.5 hover:shadow-[0_0_35px_rgba(255,255,255,0.08)] ${
       borderless ? "border-0" : "border border-white/[0.05] hover:border-white/[0.1]"
     }`}>
       <div>
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#00f2fe]" />
+          <FileText className="w-4 h-4 text-white" />
           <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Context Compiler</span>
         </h2>
       </div>
@@ -77,7 +77,7 @@ export default function ExportCard({ borderless = false }) {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full bg-[#00f2fe] hover:bg-[#00f2fe]/80 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(0,242,254,0.1)] hover:shadow-[0_0_25px_rgba(0,242,254,0.2)]"
+          className="w-full bg-white hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
         >
           {loading ? (
             <>
@@ -102,19 +102,19 @@ export default function ExportCard({ borderless = false }) {
             onDragStart={handleDragStart}
             className={`group relative p-4 rounded-xl bg-white/[0.01] hover:bg-white/[0.06] border border-dashed cursor-grab active:cursor-grabbing transition-cinematic hover:-translate-y-1 flex items-center gap-4 ${
               dragged 
-                ? "border-[#00f2fe] bg-[#00f2fe]/5 shadow-[0_0_35px_rgba(0,242,254,0.15)]" 
-                : "border-white/[0.05] hover:border-[#00f2fe]/25 hover:shadow-[0_0_35px_rgba(0,242,254,0.08)]"
+                ? "border-white bg-white/5 shadow-[0_0_35px_rgba(255,255,255,0.15)]" 
+                : "border-white/[0.05] hover:border-white/25 hover:shadow-[0_0_35px_rgba(255,255,255,0.08)]"
             }`}
             title="Drag me directly into your AI chat window (Claude, ChatGPT, Cursor, etc.)"
           >
             {/* Visual indicator for drag capability */}
             <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white/40 flex items-center gap-1">
               <span className="text-[9px] font-semibold tracking-wider font-mono">DRAG</span>
-              <Move className="w-3 h-3 text-[#00f2fe] animate-pulse" />
+              <Move className="w-3 h-3 text-white animate-pulse" />
             </div>
 
             {/* File Icon Block */}
-            <div className="p-3 bg-[#00f2fe]/10 rounded-lg text-[#00f2fe] border border-[#00f2fe]/20 group-hover:bg-[#00f2fe]/20 group-hover:text-white transition duration-300 shrink-0">
+            <div className="p-3 bg-white/10 rounded-lg text-white border border-white/20 group-hover:bg-white/20 group-hover:text-white transition duration-300 shrink-0">
               <FileText className="w-6 h-6" />
             </div>
 
@@ -126,7 +126,7 @@ export default function ExportCard({ borderless = false }) {
               <p className="text-[10px] text-white/40 font-mono mt-0.5">
                 Markdown Manifest • {exportData.size}
               </p>
-              <div className="inline-flex items-center gap-1 mt-2 text-[10px] text-[#00f2fe] bg-[#00f2fe]/10 border border-[#00f2fe]/20 px-2 py-0.5 rounded-full font-medium">
+              <div className="inline-flex items-center gap-1 mt-2 text-white bg-white/10 border border-white/20 px-2 py-0.5 rounded-full font-medium">
                 <CheckCircle2 className="w-3 h-3" />
                 Compiled & Draggable
               </div>
@@ -148,7 +148,7 @@ export default function ExportCard({ borderless = false }) {
             <button
               onClick={handleExport}
               disabled={loading}
-              className="px-3 bg-white/[0.01] hover:bg-white/[0.06] border border-white/[0.05] text-white/60 hover:text-[#00f2fe] hover:border-[#00f2fe]/30 rounded-lg transition-cinematic active:scale-[0.98]"
+              className="px-3 bg-white/[0.01] hover:bg-white/[0.06] border border-white/[0.05] text-white/60 hover:text-white hover:border-white/30 rounded-lg transition-cinematic active:scale-[0.98]"
               title="Recompile context"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-500" : ""}`} />

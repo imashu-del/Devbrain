@@ -58,7 +58,7 @@ const CentralCoreTelemetry = ({ isHarvesting = true }) => {
               htmlFor="devbrain-core-checkbox" 
               className={`absolute w-full h-full rounded-full border-4 bg-gradient-to-br from-[#0a2a5e] to-[#1e4d8c] flex items-center justify-center cursor-pointer transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) before:absolute before:content-[""] before:w-[6.25em] before:h-[6.25em] before:rounded-full before:bg-gradient-to-br before:from-[#0a2a5e] before:to-[#2c5aa0] before:z-[-1] before:shadow-[5px_5px_15px_rgba(0,0,0,0.4),-5px_-5px_15px_rgba(255,255,255,0.02)] ${
                 activeState 
-                  ? 'border-[#00f2fe] shadow-[inset_-2px_-2px_0_#2c5aa0,inset_2px_2px_0_#041e42]' 
+                  ? 'border-[#ffffff] shadow-[inset_-2px_-2px_0_#2c5aa0,inset_2px_2px_0_#041e42]' 
                   : 'border-[#041e42] shadow-[inset_2px_2px_0_#2c5aa0,inset_-2px_-2px_0px_#041e42]'
               }`}
             >
@@ -69,7 +69,7 @@ const CentralCoreTelemetry = ({ isHarvesting = true }) => {
                   id="Capa_1" 
                   className={`w-full h-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
                     activeState 
-                      ? 'fill-[#00f2fe] drop-shadow-[0_0_8px_rgba(0,242,254,0.6)]' 
+                      ? 'fill-[#ffffff] drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]' 
                       : 'fill-[#f43f5e]'
                   }`}
                 >

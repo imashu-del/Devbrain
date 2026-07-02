@@ -107,7 +107,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050608] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/15 via-black to-black text-slate-100 font-sans selection:bg-[#00f2fe]/30 selection:text-[#00f2fe] flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
+    <div className="min-h-screen bg-[#050608] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/15 via-black to-black text-slate-100 font-sans selection:bg-white/20 selection:text-white flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
       
       {/* Interactive canvas-based dotted glow background */}
       <DottedGlowBackground 
@@ -115,7 +115,7 @@ export default function Home() {
         gap={16} 
         radius={1.2} 
         color="rgba(255, 255, 255, 0.35)" 
-        glowColor="rgba(0, 242, 254, 0.85)" 
+        glowColor="rgba(255, 255, 255, 0.85)" 
         opacity={0.8} 
       />
 
@@ -132,7 +132,7 @@ export default function Home() {
             ? "bg-rose-950/80 border-rose-500/30 text-rose-200" 
             : "bg-emerald-950/80 border-emerald-500/30 text-emerald-200"
         }`}>
-          {notification.type === "error" ? <AlertTriangle className="w-5 h-5 text-rose-400" /> : <CheckCircle2 className="w-5 h-5 text-[#00f2fe]" />}
+          {notification.type === "error" ? <AlertTriangle className="w-5 h-5 text-rose-400" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
           <span className="text-sm font-medium font-mono">{notification.message}</span>
         </div>
       )}
@@ -154,7 +154,7 @@ export default function Home() {
         
         {/* Radial blur aura pulse glow */}
         {isHarvesting && (
-          <div className="absolute w-[360px] h-[360px] rounded-full bg-[#00f2fe]/5 blur-3xl pointer-events-none animate-pulse-radial z-0" />
+          <div className="absolute w-[360px] h-[360px] rounded-full bg-white/5 blur-3xl pointer-events-none animate-pulse-radial z-0" />
         )}
 
         <div className="relative z-10">
@@ -203,14 +203,14 @@ export default function Home() {
       {/* FLOATING ACTION BUTTON FOR CHRONOLOGY STREAM */}
       <button 
         onClick={() => setTickerOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full border border-white/[0.08] bg-slate-950/50 backdrop-blur-xl flex items-center justify-center text-white/50 hover:text-[#00f2fe] hover:border-[#00f2fe]/40 hover:shadow-[0_0_20px_rgba(0,242,254,0.3)] transition-cinematic active:scale-95 cursor-pointer group shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+        className="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full border border-white/[0.08] bg-slate-950/50 backdrop-blur-xl flex items-center justify-center text-white/50 hover:text-white hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-cinematic active:scale-95 cursor-pointer group shadow-[0_0_15px_rgba(0,0,0,0.5)]"
         title="Memory Slices Chronology"
       >
         <Layers className="w-4 h-4 transition-transform group-hover:scale-110" />
         
         {/* Sleek counter badge */}
         {timeline.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-[#00f2fe] text-[#07080a] text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-mono shadow-[0_0_8px_#00f2fe]">
+          <span className="absolute -top-1 -right-1 bg-white text-[#07080a] text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-mono shadow-[0_0_8px_#ffffff]">
             {timeline.length}
           </span>
         )}
@@ -226,7 +226,7 @@ export default function Home() {
           />
 
           {/* Floating Glassmorphic Window */}
-          <div className="relative w-full max-w-4xl bg-slate-950/75 border border-white/[0.08] backdrop-blur-2xl rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,242,254,0.15)] flex flex-col gap-4 animate-scaleUp z-10">
+          <div className="relative w-full max-w-4xl bg-slate-950/75 border border-white/[0.08] backdrop-blur-2xl rounded-2xl p-6 shadow-[0_20px_50px_rgba(255,255,255,0.06)] flex flex-col gap-4 animate-scaleUp z-10">
             
             {/* Modal Header */}
             <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
@@ -257,13 +257,13 @@ export default function Home() {
                       onClick={() => setSelectedEntry(entry)}
                       className={`py-2 px-1 border-b border-white/[0.03] last:border-b-0 cursor-pointer transition-cinematic flex flex-col gap-1 ${
                         isSelected 
-                          ? "text-[#00f2fe]" 
+                          ? "text-white font-semibold" 
                           : "text-white/30 hover:text-white/60"
                       }`}
                     >
                       <div className="flex justify-between items-center text-[10px] font-mono">
                         <div className="flex items-center gap-2 truncate max-w-[220px]">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-[#00f2fe] shadow-[0_0_8px_#00f2fe]" : "bg-white/10"}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-white shadow-[0_0_8px_#ffffff]" : "bg-white/10"}`} />
                           <span className="font-bold truncate">{entry.file}</span>
                         </div>
                         <span className="text-[9px] opacity-60 font-mono">
