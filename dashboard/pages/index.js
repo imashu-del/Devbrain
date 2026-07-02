@@ -140,47 +140,48 @@ export default function Home() {
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
       <header className="w-full max-w-7xl px-8 flex justify-between items-center z-30 transition-cinematic">
         <div className="flex items-center gap-2 text-white tracking-wider font-sans">
-          <span className="text-[48px] font-normal">DevBrain Engine Cockpit</span>
+          <span className="text-[40px] font-normal">DevBrain Engine Cockpit</span>
         </div>
       </header>
 
       {/* CENTRAL CENTERPIECE CONNECTIVITY PORT */}
-      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl gap-3.5">
-        
-        {/* Radial blur aura pulse glow */}
-        {isHarvesting && (
-          <div className="absolute w-[360px] h-[360px] rounded-full bg-white/5 blur-3xl pointer-events-none animate-pulse-radial z-0" />
-        )}
+      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl">
+        <div className="bg-white/[0.15] backdrop-blur-[9px] shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/[0.15] rounded-[32px] p-8 flex flex-col items-center gap-6 relative w-full max-w-md">
+          {/* Radial blur aura pulse glow */}
+          {isHarvesting && (
+            <div className="absolute w-[360px] h-[360px] rounded-full bg-white/5 blur-3xl pointer-events-none animate-pulse-radial z-0" />
+          )}
 
-        <div className="relative z-10">
-          <CentralCoreTelemetry isHarvesting={isHarvesting} />
-        </div>
+          <div className="relative z-10">
+            <CentralCoreTelemetry isHarvesting={isHarvesting} />
+          </div>
 
-        {/* FLOATING ACTION GLASS SHARD (Export project matrix below ring) */}
-        <div className="w-[340px] z-20">
-          <ExportCard borderless={true} />
-        </div>
+          {/* FLOATING ACTION GLASS SHARD (Export project matrix below ring) */}
+          <div className="w-full z-20">
+            <ExportCard borderless={true} />
+          </div>
 
-        {/* COMPACT MATRIX ACTION MATRIX BUTTONS */}
-        <div className="flex gap-6 z-20">
-          <button
-            onClick={() => handleAction("optimize")}
-            disabled={actionLoading !== null}
-            className="text-[14px] font-normal font-sans tracking-wider text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
-          >
-            {actionLoading === "optimize" ? "Rebalancing..." : "Rebalance Graph"}
-          </button>
-          <button
-            onClick={() => {
-              if (confirm("Reset current codebase memories?")) {
-                handleAction("purge");
-              }
-            }}
-            disabled={actionLoading !== null}
-            className="text-[14px] font-normal font-sans tracking-wider text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
-          >
-            {actionLoading === "purge" ? "Wiping Matrix..." : "Wipe Matrix"}
-          </button>
+          {/* COMPACT MATRIX ACTION MATRIX BUTTONS */}
+          <div className="flex gap-6 z-20">
+            <button
+              onClick={() => handleAction("optimize")}
+              disabled={actionLoading !== null}
+              className="text-[14px] font-normal font-sans tracking-wider text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
+            >
+              {actionLoading === "optimize" ? "Rebalancing..." : "Rebalance Graph"}
+            </button>
+            <button
+              onClick={() => {
+                if (confirm("Reset current codebase memories?")) {
+                  handleAction("purge");
+                }
+              }}
+              disabled={actionLoading !== null}
+              className="text-[14px] font-normal font-sans tracking-wider text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
+            >
+              {actionLoading === "purge" ? "Wiping Matrix..." : "Wipe Matrix"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -210,7 +211,7 @@ export default function Home() {
           />
 
           {/* Floating Glassmorphic Window */}
-          <div className="relative w-full max-w-4xl bg-slate-950/75 border border-white/[0.08] backdrop-blur-2xl rounded-2xl p-6 shadow-[0_20px_50px_rgba(255,255,255,0.06)] flex flex-col gap-4 animate-scaleUp z-10">
+          <div className="relative w-full max-w-4xl bg-white/[0.2] border border-white/[0.15] backdrop-blur-[6px] rounded-2xl p-6 shadow-[0_5px_15px_rgba(0,0,0,0.5)] flex flex-col gap-4 animate-scaleUp z-10">
             
             {/* Modal Header */}
             <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
