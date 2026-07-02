@@ -138,14 +138,10 @@ export default function Home() {
       )}
 
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
-      <header className="w-full max-w-7xl px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-white/20 font-semibold font-sans z-30 opacity-25 hover:opacity-60 transition-cinematic">
-        <div className="flex items-center gap-2">
-          <Cpu className="w-4 h-4 text-white/60" />
-          <span>DEVBRAIN FLIGHT DECK v0.2.0</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span>TOPOLOGY: {mode === "cloud" ? "CLOUD" : "LOCAL_OSS"}</span>
-          <span>MODEL: {llmModel.split('/').pop() || 'CUSTOM'}</span>
+      <header className="w-full max-w-7xl px-8 flex justify-between items-center z-30 transition-cinematic">
+        <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wider uppercase font-sans">
+          <Cpu className="w-4 h-4 text-white" />
+          <span>DEVBRAIN ENGINE COCKPIT</span>
         </div>
       </header>
 
@@ -171,7 +167,7 @@ export default function Home() {
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider uppercase text-white/25 hover:text-white/70 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider uppercase text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "optimize" ? "REBALANCING..." : "REBALANCE GRAPH"}
           </button>
@@ -182,23 +178,12 @@ export default function Home() {
               }
             }}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider uppercase text-rose-500/25 hover:text-rose-400/80 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider uppercase text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "purge" ? "WIPING MATRIX..." : "WIPE MATRIX"}
           </button>
         </div>
       </div>
-
-      {/* RAZOR-THIN STATUS METADATA TICKER BAR (At the bottom) */}
-      <footer className="w-full max-w-7xl px-8 flex justify-between items-center text-[9px] uppercase tracking-widest text-white/20 font-semibold font-sans z-30 opacity-25 hover:opacity-60 transition-cinematic">
-        <div>KNOWLEDGE BASE ENGINE • VERTICES: {nodes.length} • ENCLOSURES: {edges.length} • DIRECTORY NODES: {files.length}</div>
-        <button 
-          onClick={fetchTimeline}
-          className="hover:text-white transition-cinematic"
-        >
-          [ REFRESH TELEMETRY ]
-        </button>
-      </footer>
 
       {/* FLOATING ACTION BUTTON FOR CHRONOLOGY STREAM */}
       <button 

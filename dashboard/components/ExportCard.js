@@ -61,7 +61,7 @@ export default function ExportCard({ borderless = false }) {
       <div>
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
           <FileText className="w-4 h-4 text-white" />
-          <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Context Compiler</span>
+          <span className="text-[10px] uppercase tracking-widest text-white font-bold">Context Compiler</span>
         </h2>
       </div>
 
