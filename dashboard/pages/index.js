@@ -211,7 +211,7 @@ export default function Home() {
           />
 
           {/* Floating Glassmorphic Window */}
-          <div className="relative w-full max-w-4xl bg-white/[0.2] border border-white/[0.15] backdrop-blur-[6px] rounded-2xl p-6 shadow-[0_5px_15px_rgba(0,0,0,0.5)] flex flex-col gap-4 animate-scaleUp z-10">
+          <div className="relative w-full max-w-4xl bg-white/[0.19] border border-white/[0.15] backdrop-blur-[5px] rounded-2xl p-6 shadow-[0_1px_5px_rgba(0,0,0,0.5)] flex flex-col gap-4 animate-scaleUp z-10">
             
             {/* Modal Header */}
             <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
