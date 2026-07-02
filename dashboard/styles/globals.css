@@ -95,12 +95,8 @@
 }
 
 body {
-  background-color: #020304;
-  background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%), url('/bg.jpg');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-color: var(--background);
+  background-image: radial-gradient(circle at center, rgba(30, 58, 138, 0.15) 0%, rgba(0, 0, 0, 1) 80%);
   color: var(--foreground);
   min-height: 100vh;
   overflow-x: hidden;

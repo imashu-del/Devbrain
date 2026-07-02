@@ -107,7 +107,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen text-slate-100 font-sans selection:bg-white/20 selection:text-white flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
+    <div className="min-h-screen bg-[#050608] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/15 via-black to-black text-slate-100 font-sans selection:bg-white/20 selection:text-white flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
       
       {/* Interactive canvas-based dotted glow background */}
       <DottedGlowBackground 
@@ -139,9 +139,8 @@ export default function Home() {
 
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
       <header className="w-full max-w-7xl px-8 flex justify-between items-center z-30 transition-cinematic">
-        <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wider font-sans">
-          <Cpu className="w-4 h-4 text-white" />
-          <span>DevBrain Engine Cockpit</span>
+        <div className="flex items-center gap-2 text-white tracking-wider font-sans">
+          <span className="text-[48px] font-normal">DevBrain Engine Cockpit</span>
         </div>
       </header>
 
@@ -167,7 +166,7 @@ export default function Home() {
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[14px] font-normal font-sans tracking-wider text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
           >
             {actionLoading === "optimize" ? "Rebalancing..." : "Rebalance Graph"}
           </button>
@@ -178,7 +177,7 @@ export default function Home() {
               }
             }}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[14px] font-normal font-sans tracking-wider text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border border-white/20 hover:border-white/40 rounded-md px-4 py-2 cursor-pointer"
           >
             {actionLoading === "purge" ? "Wiping Matrix..." : "Wipe Matrix"}
           </button>

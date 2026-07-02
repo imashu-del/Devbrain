@@ -90,7 +90,7 @@ const CentralCoreTelemetry = ({ isHarvesting = true }) => {
       </div>
 
       {/* Sub-label showing current tracking status string based on state */}
-      <div className="text-[10px] tracking-widest font-bold text-white/40 text-center font-sans">
+      <div className="text-[10px] tracking-widest font-bold text-white text-center font-sans">
         {activeState ? 'Active Tracking Enabled' : '• System Idle'}
       </div>
     </div>
