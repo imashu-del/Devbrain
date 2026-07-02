@@ -107,7 +107,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050608] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/15 via-black to-black text-slate-100 font-sans selection:bg-white/20 selection:text-white flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
+    <div className="min-h-screen text-slate-100 font-sans selection:bg-white/20 selection:text-white flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
       
       {/* Interactive canvas-based dotted glow background */}
       <DottedGlowBackground 
