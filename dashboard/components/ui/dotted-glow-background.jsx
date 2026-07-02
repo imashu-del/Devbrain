@@ -1,40 +1,5 @@
-"use client";
-
+"use client";;
 import React, { useEffect, useRef, useState } from "react";
-
-type DottedGlowBackgroundProps = {
-  className?: string;
-  /** distance between dot centers in pixels */
-  gap?: number;
-  /** base radius of each dot in CSS px */
-  radius?: number;
-  /** dot color (will pulse by alpha) */
-  color?: string;
-  /** optional dot color for dark mode */
-  darkColor?: string;
-  /** shadow/glow color for bright dots */
-  glowColor?: string;
-  /** optional glow color for dark mode */
-  darkGlowColor?: string;
-  /** optional CSS variable name for light dot color (e.g. --color-zinc-900) */
-  colorLightVar?: string;
-  /** optional CSS variable name for dark dot color (e.g. --color-zinc-100) */
-  colorDarkVar?: string;
-  /** optional CSS variable name for light glow color */
-  glowColorLightVar?: string;
-  /** optional CSS variable name for dark glow color */
-  glowColorDarkVar?: string;
-  /** global opacity for the whole layer */
-  opacity?: number;
-  /** background radial fade opacity (0 = transparent background) */
-  backgroundOpacity?: number;
-  /** minimum per-dot speed in rad/s */
-  speedMin?: number;
-  /** maximum per-dot speed in rad/s */
-  speedMax?: number;
-  /** global speed multiplier for all dots */
-  speedScale?: number;
-};
 
 /**
  * Canvas-based dotted background that randomly glows and dims.
@@ -58,23 +23,20 @@ export const DottedGlowBackground = ({
   backgroundOpacity = 0,
   speedMin = 0.4,
   speedMax = 1.3,
-  speedScale = 1,
-}: DottedGlowBackgroundProps) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [resolvedColor, setResolvedColor] = useState<string>(color);
-  const [resolvedGlowColor, setResolvedGlowColor] = useState<string>(glowColor);
+  speedScale = 1
+}) => {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const [resolvedColor, setResolvedColor] = useState(color);
+  const [resolvedGlowColor, setResolvedGlowColor] = useState(glowColor);
 
   // Resolve CSS variable value from the container or root
-  const resolveCssVariable = (
-    el: Element,
-    variableName?: string,
-  ): string | null => {
+  const resolveCssVariable = (el, variableName) => {
     if (!variableName) return null;
     const normalized = variableName.startsWith("--")
       ? variableName
       : `--${variableName}`;
-    const fromEl = getComputedStyle(el as Element)
+    const fromEl = getComputedStyle(el)
       .getPropertyValue(normalized)
       .trim();
     if (fromEl) return fromEl;
@@ -83,14 +45,11 @@ export const DottedGlowBackground = ({
     return fromRoot || null;
   };
 
-  const detectDarkMode = (): boolean => {
+  const detectDarkMode = () => {
     const root = document.documentElement;
     if (root.classList.contains("dark")) return true;
     if (root.classList.contains("light")) return false;
-    return (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
+    return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   };
 
   // Keep resolved colors in sync with theme changes and prop updates
@@ -100,8 +59,8 @@ export const DottedGlowBackground = ({
     const compute = () => {
       const isDark = detectDarkMode();
 
-      let nextColor: string = color;
-      let nextGlow: string = glowColor;
+      let nextColor = color;
+      let nextGlow = glowColor;
 
       if (isDark) {
         const varDot = resolveCssVariable(container, colorDarkVar);
@@ -156,8 +115,6 @@ export const DottedGlowBackground = ({
     const ctx = el.getContext("2d");
     if (!ctx) return;
 
-
-
     let raf = 0;
     let stopped = false;
     let isVisible = true;
@@ -178,7 +135,7 @@ export const DottedGlowBackground = ({
     resize();
 
     // Precompute dot metadata for a medium-sized grid and regenerate on resize
-    let dots: { x: number; y: number; phase: number; speed: number }[] = [];
+    let dots = [];
 
     const regenDots = () => {
       dots = [];
@@ -208,7 +165,7 @@ export const DottedGlowBackground = ({
 
     let last = performance.now();
 
-    const draw = (now: number) => {
+    const draw = (now) => {
       if (stopped) return;
       if (!isVisible) {
         raf = requestAnimationFrame(draw);
@@ -229,14 +186,11 @@ export const DottedGlowBackground = ({
           Math.min(width, height) * 0.1,
           width * 0.5,
           height * 0.5,
-          Math.max(width, height) * 0.7,
+          Math.max(width, height) * 0.7
         );
         grad.addColorStop(0, "rgba(0,0,0,0)");
-        grad.addColorStop(
-          1,
-          `rgba(0,0,0,${Math.min(Math.max(backgroundOpacity, 0), 1)})`,
-        );
-        ctx.fillStyle = grad as unknown as CanvasGradient;
+        grad.addColorStop(1, `rgba(0,0,0,${Math.min(Math.max(backgroundOpacity, 0), 1)})`);
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
       }
 
@@ -277,12 +231,9 @@ export const DottedGlowBackground = ({
       regenThrottled();
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? true;
-      },
-      { threshold: 0.1 },
-    );
+    const observer = new IntersectionObserver((entries) => {
+      isVisible = entries[0]?.isIntersecting ?? true;
+    }, { threshold: 0.1 });
     observer.observe(container);
 
     window.addEventListener("resize", handleResize);
@@ -311,12 +262,10 @@ export const DottedGlowBackground = ({
     <div
       ref={containerRef}
       className={className}
-      style={{ position: "absolute", inset: 0 }}
-    >
+      style={{ position: "absolute", inset: 0 }}>
       <canvas
         ref={canvasRef}
-        style={{ display: "block", width: "100%", height: "100%" }}
-      />
+        style={{ display: "block", width: "100%", height: "100%" }} />
     </div>
   );
 };

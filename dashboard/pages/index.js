@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import ExportCard from "../components/ExportCard";
 import CentralCoreTelemetry from "../components/CentralCoreTelemetry";
+import { DottedGlowBackground } from "../components/ui/dotted-glow-background";
 import { 
   Cpu, 
   Layers, 
@@ -107,6 +108,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#050608] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/15 via-black to-black text-slate-100 font-sans selection:bg-[#00f2fe]/30 selection:text-[#00f2fe] flex flex-col justify-between items-center relative overflow-hidden transition-cinematic py-10 pb-20">
+      
+      {/* Interactive canvas-based dotted glow background */}
+      <DottedGlowBackground 
+        className="absolute inset-0 z-0 pointer-events-none" 
+        gap={16} 
+        radius={1.2} 
+        color="rgba(255, 255, 255, 0.04)" 
+        glowColor="rgba(0, 242, 254, 0.25)" 
+        opacity={0.65} 
+      />
+
       <Head>
         <title>DevBrain Command Center</title>
         <meta name="description" content="Cinematic Sovereign Persistent Memory Hub" />
