@@ -63,9 +63,6 @@ export default function ExportCard({ borderless = false }) {
           <FileText className="w-4 h-4 text-[#00f2fe]" />
           <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Context Compiler</span>
         </h2>
-        <p className="text-[11px] text-white/40 mt-1">
-          Compile active graph memory slice into a Markdown prompt manifest.
-        </p>
       </div>
 
       {error && (
@@ -80,7 +77,7 @@ export default function ExportCard({ borderless = false }) {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full bg-[#00f2fe] hover:bg-[#00f2fe]/80 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(0,242,254,0.1)] hover:shadow-[0_0_25px_rgba(0,242,254,0.2)]"
+          className="w-full bg-[#00f2fe] hover:bg-[#00f2fe]/80 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-bold text-xs py-2 px-4 rounded-full flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(0,242,254,0.1)] hover:shadow-[0_0_25px_rgba(0,242,254,0.2)]"
         >
           {loading ? (
             <>

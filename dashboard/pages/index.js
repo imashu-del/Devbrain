@@ -126,7 +126,7 @@ export default function Home() {
       )}
 
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
-      <header className="w-full max-w-7xl px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-white/30 font-semibold font-mono z-30">
+      <header className="w-full max-w-7xl px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-white/20 font-semibold font-mono z-30 opacity-25 hover:opacity-60 transition-cinematic">
         <div className="flex items-center gap-2">
           <Cpu className="w-4 h-4 text-white/60" />
           <span>DEVBRAIN FLIGHT DECK v0.2.0</span>
@@ -138,7 +138,7 @@ export default function Home() {
       </header>
 
       {/* CENTRAL CENTERPIECE CONNECTIVITY PORT */}
-      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl gap-6">
+      <div className="flex-1 flex flex-col justify-center items-center relative my-auto z-10 w-full max-w-3xl gap-3.5">
         
         {/* Radial blur aura pulse glow */}
         {isHarvesting && (
@@ -155,11 +155,11 @@ export default function Home() {
         </div>
 
         {/* COMPACT MATRIX ACTION MATRIX BUTTONS */}
-        <div className="flex gap-4 z-20">
+        <div className="flex gap-6 z-20">
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
-            className="px-4 py-1.5 rounded-full border border-white/[0.05] bg-white/[0.01] hover:bg-white/[0.04] text-[9px] font-mono tracking-wider uppercase text-white/50 hover:text-white transition-cinematic active:scale-95"
+            className="text-[9px] font-mono tracking-wider uppercase text-white/25 hover:text-white/70 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "optimize" ? "REBALANCING..." : "REBALANCE GRAPH"}
           </button>
@@ -170,7 +170,7 @@ export default function Home() {
               }
             }}
             disabled={actionLoading !== null}
-            className="px-4 py-1.5 rounded-full border border-rose-500/10 bg-transparent hover:bg-rose-950/10 text-[9px] font-mono tracking-wider uppercase text-rose-400/60 hover:text-rose-400 transition-cinematic active:scale-95"
+            className="text-[9px] font-mono tracking-wider uppercase text-rose-500/25 hover:text-rose-400/80 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "purge" ? "WIPING MATRIX..." : "WIPE MATRIX"}
           </button>
@@ -178,7 +178,7 @@ export default function Home() {
       </div>
 
       {/* RAZOR-THIN STATUS METADATA TICKER BAR (At the bottom) */}
-      <footer className="w-full max-w-7xl px-8 flex justify-between items-center text-[9px] uppercase tracking-widest text-white/30 font-semibold font-mono z-30">
+      <footer className="w-full max-w-7xl px-8 flex justify-between items-center text-[9px] uppercase tracking-widest text-white/20 font-semibold font-mono z-30 opacity-25 hover:opacity-60 transition-cinematic">
         <div>KNOWLEDGE BASE ENGINE • VERTICES: {nodes.length} • ENCLOSURES: {edges.length} • DIRECTORY NODES: {files.length}</div>
         <button 
           onClick={fetchTimeline}
@@ -189,20 +189,20 @@ export default function Home() {
       </footer>
 
       {/* TICKER DRAWER ON THE BOTTOM EDGE */}
-      <div className={`fixed bottom-0 left-0 right-0 border-t border-white/[0.05] bg-[#050608]/95 backdrop-blur-2xl transition-cinematic z-40 ${tickerOpen ? 'h-[360px]' : 'h-8'}`}>
+      <div className={`fixed bottom-0 left-0 right-0 border-t border-white/[0.02] bg-[#050608]/95 backdrop-blur-2xl transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) z-40 ${tickerOpen ? 'h-[360px]' : 'h-8'}`}>
         {/* Ticker Header */}
         <div 
           onClick={() => setTickerOpen(!tickerOpen)}
-          className="flex justify-between items-center px-6 h-8 cursor-pointer border-b border-white/[0.02] hover:bg-white/[0.01]"
+          className="flex justify-between items-center px-6 h-8 cursor-pointer hover:bg-white/[0.01] transition-cinematic"
         >
           <div className="flex items-center gap-2">
-            <Layers className="w-3 h-3 text-[#00f2fe]" />
+            <Layers className="w-3 h-3 text-white/40" />
             <span className="text-[9px] uppercase tracking-widest text-white/40 font-bold">Memory Slices Chronology Stream</span>
-            <span className="text-[8px] bg-[#00f2fe]/10 text-[#00f2fe] px-1.5 py-0.5 rounded font-mono">
+            <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono">
               {timeline.length}
             </span>
           </div>
-          <div className="text-[8px] uppercase tracking-wider text-white/30 font-mono">
+          <div className="text-[9px] tracking-widest uppercase text-white/20 hover:text-white/60 transition-cinematic">
             {tickerOpen ? "[- Collapse]" : "[+ Expand]"}
           </div>
         </div>
@@ -211,24 +211,29 @@ export default function Home() {
         {tickerOpen && (
           <div className="p-6 h-[328px] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
             {/* Timeline list */}
-            <div className="flex flex-col gap-2 max-h-[280px] overflow-y-auto pr-4 border-r border-white/[0.05]">
+            <div className="flex flex-col max-h-[280px] overflow-y-auto pr-4 border-r border-white/[0.05]">
               {timeline.map((entry, idx) => {
                 const isSelected = selectedEntry && selectedEntry.timestamp === entry.timestamp && selectedEntry.file === entry.file;
                 return (
                   <div 
                     key={idx}
                     onClick={() => setSelectedEntry(entry)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-cinematic ${
+                    className={`py-2 px-1 border-b border-white/[0.03] last:border-b-0 cursor-pointer transition-cinematic flex flex-col gap-1 ${
                       isSelected 
-                        ? "bg-white/[0.04] border-[#00f2fe]/20 text-[#00f2fe]" 
-                        : "bg-white/[0.01] border-white/[0.03] text-white/60 hover:bg-white/[0.02]"
+                        ? "text-[#00f2fe]" 
+                        : "text-white/30 hover:text-white/60"
                     }`}
                   >
                     <div className="flex justify-between items-center text-[10px] font-mono">
-                      <span className="font-bold truncate max-w-[200px]">{entry.file}</span>
-                      <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                      <div className="flex items-center gap-2 truncate max-w-[220px]">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-[#00f2fe] shadow-[0_0_8px_#00f2fe]" : "bg-white/10"}`} />
+                        <span className="font-bold truncate">{entry.file}</span>
+                      </div>
+                      <span className="text-[9px] opacity-60 font-mono">
+                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </span>
                     </div>
-                    <p className="text-[9px] text-white/40 line-clamp-1 mt-1 font-mono">{entry.snippets}</p>
+                    <p className="text-[9px] opacity-40 line-clamp-1 font-mono pl-3.5">{entry.snippets}</p>
                   </div>
                 );
               })}
@@ -241,12 +246,12 @@ export default function Home() {
                   <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-mono">
                     DIFF PAYLOAD: {selectedEntry.file}
                   </div>
-                  <div className="bg-black/40 border border-white/[0.05] p-3 rounded-lg font-mono text-[9px] max-h-[230px] overflow-auto leading-relaxed">
+                  <div className="bg-[#030405]/60 border border-white/[0.04] rounded-lg p-4 font-mono text-[10px] max-h-[230px] overflow-auto leading-relaxed">
                     <pre className="text-white/80">
                       {selectedEntry.diff.split("\n").map((line, lIdx) => {
                         let lineClass = "text-white/30";
                         if (line.startsWith("+") && !line.startsWith("+++")) {
-                          lineClass = "text-[#00f2fe] bg-[#00f2fe]/5 px-1 py-0.5 rounded";
+                          lineClass = "text-emerald-400/80 bg-emerald-500/[0.04] px-1 py-0.5 rounded";
                         } else if (line.startsWith("-") && !line.startsWith("---")) {
                           lineClass = "text-rose-400 bg-rose-950/20 px-1 py-0.5 rounded";
                         } else if (line.startsWith("@@")) {
