@@ -138,7 +138,7 @@ export default function Home() {
       )}
 
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
-      <header className="w-full max-w-7xl px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-white/20 font-semibold font-mono z-30 opacity-25 hover:opacity-60 transition-cinematic">
+      <header className="w-full max-w-7xl px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-white/20 font-semibold font-sans z-30 opacity-25 hover:opacity-60 transition-cinematic">
         <div className="flex items-center gap-2">
           <Cpu className="w-4 h-4 text-white/60" />
           <span>DEVBRAIN FLIGHT DECK v0.2.0</span>
@@ -171,7 +171,7 @@ export default function Home() {
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
-            className="text-[9px] font-mono tracking-wider uppercase text-white/25 hover:text-white/70 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider uppercase text-white/25 hover:text-white/70 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "optimize" ? "REBALANCING..." : "REBALANCE GRAPH"}
           </button>
@@ -182,7 +182,7 @@ export default function Home() {
               }
             }}
             disabled={actionLoading !== null}
-            className="text-[9px] font-mono tracking-wider uppercase text-rose-500/25 hover:text-rose-400/80 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider uppercase text-rose-500/25 hover:text-rose-400/80 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
             {actionLoading === "purge" ? "WIPING MATRIX..." : "WIPE MATRIX"}
           </button>
@@ -190,7 +190,7 @@ export default function Home() {
       </div>
 
       {/* RAZOR-THIN STATUS METADATA TICKER BAR (At the bottom) */}
-      <footer className="w-full max-w-7xl px-8 flex justify-between items-center text-[9px] uppercase tracking-widest text-white/20 font-semibold font-mono z-30 opacity-25 hover:opacity-60 transition-cinematic">
+      <footer className="w-full max-w-7xl px-8 flex justify-between items-center text-[9px] uppercase tracking-widest text-white/20 font-semibold font-sans z-30 opacity-25 hover:opacity-60 transition-cinematic">
         <div>KNOWLEDGE BASE ENGINE • VERTICES: {nodes.length} • ENCLOSURES: {edges.length} • DIRECTORY NODES: {files.length}</div>
         <button 
           onClick={fetchTimeline}
@@ -232,14 +232,14 @@ export default function Home() {
             <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-white/50" />
-                <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold font-mono">Memory Slices Chronology Stream</span>
-                <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold font-sans">Memory Slices Chronology Stream</span>
+                <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-sans">
                   {timeline.length} TOTAL SLICES
                 </span>
               </div>
               <button 
                 onClick={() => setTickerOpen(false)}
-                className="text-[10px] font-mono tracking-widest uppercase text-white/30 hover:text-white/80 transition-cinematic bg-transparent border-0 cursor-pointer"
+                className="text-[10px] font-sans tracking-widest uppercase text-white/30 hover:text-white/80 transition-cinematic bg-transparent border-0 cursor-pointer"
               >
                 [ CLOSE ]
               </button>
@@ -280,7 +280,7 @@ export default function Home() {
               <div className="max-h-full overflow-y-auto pr-2">
                 {selectedEntry ? (
                   <div className="flex flex-col gap-2">
-                    <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-mono">
+                    <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-sans">
                       DIFF PAYLOAD: {selectedEntry.file}
                     </div>
                     <div className="bg-[#030405]/60 border border-white/[0.04] rounded-lg p-4 font-mono text-[10px] max-h-[340px] overflow-auto leading-relaxed">
