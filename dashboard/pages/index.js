@@ -139,9 +139,9 @@ export default function Home() {
 
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
       <header className="w-full max-w-7xl px-8 flex justify-between items-center z-30 transition-cinematic">
-        <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wider uppercase font-sans">
+        <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wider font-sans">
           <Cpu className="w-4 h-4 text-white" />
-          <span>DEVBRAIN ENGINE COCKPIT</span>
+          <span>DevBrain Engine Cockpit</span>
         </div>
       </header>
 
@@ -167,9 +167,9 @@ export default function Home() {
           <button
             onClick={() => handleAction("optimize")}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider uppercase text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider text-white/60 hover:text-white transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
-            {actionLoading === "optimize" ? "REBALANCING..." : "REBALANCE GRAPH"}
+            {actionLoading === "optimize" ? "Rebalancing..." : "Rebalance Graph"}
           </button>
           <button
             onClick={() => {
@@ -178,9 +178,9 @@ export default function Home() {
               }
             }}
             disabled={actionLoading !== null}
-            className="text-[9px] font-sans tracking-wider uppercase text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
+            className="text-[9px] font-sans tracking-wider text-rose-500/60 hover:text-rose-400 transition-cinematic active:scale-95 bg-transparent border-0 cursor-pointer"
           >
-            {actionLoading === "purge" ? "WIPING MATRIX..." : "WIPE MATRIX"}
+            {actionLoading === "purge" ? "Wiping Matrix..." : "Wipe Matrix"}
           </button>
         </div>
       </div>
@@ -217,16 +217,16 @@ export default function Home() {
             <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-white/50" />
-                <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold font-sans">Memory Slices Chronology Stream</span>
+                <span className="text-[10px] tracking-wider text-white/50 font-bold font-sans">Memory Slices Chronology Stream</span>
                 <span className="text-[8px] bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-sans">
-                  {timeline.length} TOTAL SLICES
+                  {timeline.length} Total Slices
                 </span>
               </div>
               <button 
                 onClick={() => setTickerOpen(false)}
-                className="text-[10px] font-sans tracking-widest uppercase text-white/30 hover:text-white/80 transition-cinematic bg-transparent border-0 cursor-pointer"
+                className="text-[10px] font-sans tracking-wider text-white/30 hover:text-white/80 transition-cinematic bg-transparent border-0 cursor-pointer"
               >
-                [ CLOSE ]
+                [ Close ]
               </button>
             </div>
 
@@ -265,8 +265,8 @@ export default function Home() {
               <div className="max-h-full overflow-y-auto pr-2">
                 {selectedEntry ? (
                   <div className="flex flex-col gap-2">
-                    <div className="text-[9px] uppercase tracking-wider text-white/40 font-semibold font-sans">
-                      DIFF PAYLOAD: {selectedEntry.file}
+                    <div className="text-[9px] tracking-wider text-white/40 font-semibold font-sans">
+                      Diff Payload: {selectedEntry.file}
                     </div>
                     <div className="bg-[#030405]/60 border border-white/[0.04] rounded-lg p-4 font-mono text-[10px] max-h-[340px] overflow-auto leading-relaxed">
                       <pre className="text-white/80">
@@ -289,7 +289,7 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-widest text-white/30">
+                  <div className="flex h-full items-center justify-center text-[10px] tracking-wider text-white/30">
                     Select a slice to inspect git payload
                   </div>
                 )}

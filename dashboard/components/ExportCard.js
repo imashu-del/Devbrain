@@ -61,7 +61,7 @@ export default function ExportCard({ borderless = false }) {
       <div>
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
           <FileText className="w-4 h-4 text-white" />
-          <span className="text-[10px] uppercase tracking-widest text-white font-bold">Context Compiler</span>
+          <span className="text-[10px] tracking-wider text-white font-bold">Context Compiler</span>
         </h2>
       </div>
 
@@ -77,17 +77,17 @@ export default function ExportCard({ borderless = false }) {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full bg-white hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-sans tracking-widest text-[10px] font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+          className="w-full bg-white hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 text-[#07080a] font-sans tracking-wider text-[10px] font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-cinematic shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
         >
           {loading ? (
             <>
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-500" />
-              <span className="text-amber-500 font-medium">COMPILING GRAPH CONTEXT...</span>
+              <span className="text-amber-500 font-medium">Compiling Graph Context...</span>
             </>
           ) : (
             <>
               <RefreshCw className="w-3.5 h-3.5" />
-              EXPORT CONTEXT
+              Export Context
             </>
           )}
         </button>
@@ -109,7 +109,7 @@ export default function ExportCard({ borderless = false }) {
           >
             {/* Visual indicator for drag capability */}
             <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white/40 flex items-center gap-1">
-              <span className="text-[9px] font-semibold tracking-wider font-mono">DRAG</span>
+              <span className="text-[9px] font-semibold tracking-wider font-sans">Drag</span>
               <Move className="w-3 h-3 text-white animate-pulse" />
             </div>
 
