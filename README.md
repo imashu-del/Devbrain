@@ -159,3 +159,27 @@ Open the interactive visual dashboard to monitor telemetry:
 python devbrain.py dashboard
 ```
 *Next.js will automatically launch on [http://localhost:3000](http://localhost:3000).*
+
+---
+
+## Production Memory Capture & MCP Integration
+
+DevBrain now supports explicit reasoning capture in addition to watchdog diff capture. Use these commands to preserve answers, explanations, architecture decisions, migration rationale, and cross-tool session summaries:
+
+```bash
+python devbrain.py note --type architecture_decision "Moved auth to JWT because the deployment target needs stateless horizontal scaling."
+python devbrain.py ingest-chat ./path/to/exported-session.md
+python devbrain.py health
+python devbrain.py datasets
+python devbrain.py mcp
+```
+
+The MCP server runs over stdio and exposes tools for AI agents:
+
+- `devbrain_capture_reasoning` stores reasoning and decisions through `cognee.remember()`.
+- `devbrain_recall_context` retrieves relevant memory through `cognee.recall()`.
+- `devbrain_health` reports provider, dataset, graph, and fallback status.
+- `devbrain_list_datasets` lists Cognee datasets.
+- `devbrain_optimize_memory` triggers `cognee.improve()` with before/after health data.
+
+Normal initialization is non-destructive. If embedding dimensions change, DevBrain reports the mismatch instead of deleting `.cognee_system` or `.data_storage` during dashboard reads or ordinary CLI operations. Dataset purge remains explicit and uses `cognee.forget(dataset=...)`.

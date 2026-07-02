@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import ExportCard from "../components/ExportCard";
 import CentralCoreTelemetry from "../components/CentralCoreTelemetry";
@@ -29,6 +29,10 @@ export default function Home() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [files, setFiles] = useState([]);
+  const [memoryStatus, setMemoryStatus] = useState(null);
+  const [captureText, setCaptureText] = useState("");
+  const [captureType, setCaptureType] = useState("architecture_decision");
+  const [captureLoading, setCaptureLoading] = useState(false);
   
   // Mesh Integration states
   const [stitchProjectId, setStitchProjectId] = useState("");
@@ -37,9 +41,15 @@ export default function Home() {
   
   // Ticker Drawer State
   const [tickerOpen, setTickerOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  const showToast = useCallback((message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  }, []);
 
   // Fetch timeline data from local Cognee memory API
-  const fetchTimeline = async () => {
+  const fetchTimeline = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/memory");
@@ -56,6 +66,7 @@ export default function Home() {
       setNodes(data.nodes || []);
       setEdges(data.edges || []);
       setFiles(data.files || []);
+      setMemoryStatus(data.memoryStatus || data.health || null);
       
       // Mesh integrations
       setStitchProjectId(data.stitchProjectId || "");
@@ -70,17 +81,14 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
-    fetchTimeline();
-  }, []);
-
-  const [notification, setNotification] = useState(null);
-  const showToast = (message, type = "success") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
+    const timer = setTimeout(() => {
+      fetchTimeline();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchTimeline]);
 
   const handleAction = async (actionType) => {
     setActionLoading(actionType);
@@ -103,6 +111,39 @@ export default function Home() {
       showToast("Could not contact the local API backend.", "error");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+
+  const handleCapture = async () => {
+    const content = captureText.trim();
+    if (!content) {
+      showToast("Add a decision or reasoning note first.", "error");
+      return;
+    }
+    setCaptureLoading(true);
+    try {
+      const res = await fetch("/api/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: captureType,
+          content,
+          metadata: { surface: "dashboard" },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        showToast(data.error || "Capture failed.", "error");
+        return;
+      }
+      setCaptureText("");
+      showToast(`Reasoning captured via ${data.source || "Cognee"}.`, data.fallbackUsed ? "error" : "success");
+      fetchTimeline();
+    } catch (err) {
+      showToast("Could not capture reasoning note.", "error");
+    } finally {
+      setCaptureLoading(false);
     }
   };
 
@@ -161,6 +202,39 @@ export default function Home() {
             <ExportCard borderless={true} />
           </div>
 
+          <div className="w-full z-20 border border-white/[0.08] bg-black/20 rounded-xl p-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-3 text-[9px] font-mono text-white/45">
+              <span>{memoryStatus?.fallbackUsed ? "Memory: Fallback" : "Memory: Cognee"}</span>
+              <span>{memoryStatus?.nodeCount ?? nodes.length}N / {memoryStatus?.edgeCount ?? edges.length}E</span>
+            </div>
+            <textarea
+              value={captureText}
+              onChange={(event) => setCaptureText(event.target.value)}
+              placeholder="Capture decision, answer, or reasoning..."
+              className="w-full min-h-[58px] resize-none rounded-md border border-white/[0.08] bg-black/30 px-3 py-2 text-[10px] leading-relaxed text-white/80 placeholder:text-white/25 outline-none focus:border-white/25 font-mono"
+            />
+            <div className="flex gap-2">
+              <select
+                value={captureType}
+                onChange={(event) => setCaptureType(event.target.value)}
+                className="min-w-0 flex-1 rounded-md border border-white/[0.08] bg-black/30 px-2 py-1.5 text-[10px] text-white/60 outline-none focus:border-white/25"
+              >
+                <option value="architecture_decision">Architecture Decision</option>
+                <option value="implementation_reasoning">Implementation Reasoning</option>
+                <option value="migration_reason">Migration Reason</option>
+                <option value="chat_answer">Chat Answer</option>
+                <option value="manual_note">Manual Note</option>
+              </select>
+              <button
+                onClick={handleCapture}
+                disabled={captureLoading}
+                className="rounded-md border border-white/20 px-3 py-1.5 text-[10px] text-white/65 hover:text-white hover:border-white/40 transition-cinematic disabled:opacity-40"
+              >
+                {captureLoading ? "Saving..." : "Capture"}
+              </button>
+            </div>
+          </div>
+
           {/* COMPACT MATRIX ACTION MATRIX BUTTONS */}
           <div className="flex gap-6 z-20">
             <button
@@ -172,7 +246,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => {
-                if (confirm("Reset current codebase memories?")) {
+                if (confirm("Purge dataset main_dataset? This is destructive and cannot be undone.")) {
                   handleAction("purge");
                 }
               }}

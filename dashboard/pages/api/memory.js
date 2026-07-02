@@ -1,7 +1,35 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import path from "path";
 
 import fs from "fs";
+
+
+const runPythonJson = (parentDir, args, timeout = 35000) => {
+  return new Promise((resolve) => {
+    const child = spawn("python", args, {
+      cwd: parentDir,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    const timer = setTimeout(() => {
+      child.kill();
+      resolve({ ok: false, error: "Python command timed out.", stderr });
+    }, timeout);
+
+    child.stdout.on("data", (chunk) => { stdout += chunk.toString(); });
+    child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      try {
+        const parsed = JSON.parse(stdout.trim() || "{}");
+        resolve({ ...parsed, exitCode: code, stderr });
+      } catch (err) {
+        resolve({ ok: false, error: `Invalid Python JSON output: ${err.message}`, stdout, stderr, exitCode: code });
+      }
+    });
+  });
+};
 
 const checkHarvesterRunning = () => {
   return new Promise((resolve) => {
@@ -62,74 +90,43 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     const isHarvesting = await checkHarvesterRunning();
-    const scriptPath = path.join(parentDir, "get_dashboard_data.py");
-    const pyCommand = `python "${scriptPath}"`;
-    
-    exec(pyCommand, { cwd: parentDir, timeout: 35000, maxBuffer: 1024 * 1024 * 5 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Subprocess error: ${error}`);
-        return res.status(200).json({ 
-          entries: getMockTimelineData(), 
-          mode: devbrainMode, 
-          provider: devbrainLLMProvider,
-          llmModel: devbrainLLMProvider === 'nemotron' ? 'openai/nvidia/nemotron-3-ultra-550b-a55b' : 'gpt-4o-mini',
-          embedding_provider: devbrainLLMProvider === 'nemotron' ? 'fastembed' : 'openai',
-          embedding_dimensions: devbrainLLMProvider === 'nemotron' ? 384 : 1536,
-          isHarvesting,
-          nodes: [],
-          edges: [],
-          files: []
-        });
-      }
-      
-      try {
-        const data = JSON.parse(stdout.trim());
-        return res.status(200).json({
-          ...data,
-          isHarvesting
-        });
-      } catch (parseErr) {
-        console.error(`JSON Parse error: ${parseErr}`);
-        return res.status(200).json({
-          entries: getMockTimelineData(),
-          mode: devbrainMode,
-          provider: devbrainLLMProvider,
-          llmModel: devbrainLLMProvider === 'nemotron' ? 'openai/nvidia/nemotron-3-ultra-550b-a55b' : 'gpt-4o-mini',
-          embedding_provider: devbrainLLMProvider === 'nemotron' ? 'fastembed' : 'openai',
-          embedding_dimensions: devbrainLLMProvider === 'nemotron' ? 384 : 1536,
-          isHarvesting,
-          nodes: [],
-          edges: [],
-          files: []
-        });
-      }
-    });
+    const result = await runPythonJson(parentDir, ["get_dashboard_data.py"], 35000);
+    if (!result || result.ok === false && !result.entries) {
+      return res.status(200).json({
+        entries: getMockTimelineData(),
+        mode: devbrainMode,
+        provider: devbrainLLMProvider,
+        llmModel: devbrainLLMProvider === 'nemotron' ? 'openai/nvidia/nemotron-3-ultra-550b-a55b' : 'gpt-4o-mini',
+        embedding_provider: devbrainLLMProvider === 'nemotron' ? 'fastembed' : 'openai',
+        embedding_dimensions: devbrainLLMProvider === 'nemotron' ? 384 : 1536,
+        isHarvesting,
+        nodes: [],
+        edges: [],
+        files: [],
+        memoryStatus: { healthy: false, source: 'fallback', fallbackUsed: true, lastError: result?.error || 'Dashboard data unavailable.' }
+      });
+    }
+    return res.status(200).json({ ...result, isHarvesting });
   } 
   
   else if (req.method === "POST") {
     const { action, dataset } = req.body;
     
     if (action === "optimize") {
-      const pyCommand = `python -c "import asyncio, devbrain_core; asyncio.run(devbrain_core.init_memory()); asyncio.run(devbrain_core.optimize_memory())"`;
-      exec(pyCommand, { cwd: parentDir, timeout: 30000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Optimize error: ${error}`);
-          return res.status(500).json({ error: error.message });
-        }
-        return res.status(200).json({ message: "Graph memory optimized and balanced successfully." });
-      });
+      const result = await runPythonJson(parentDir, ["devbrain_bridge.py", "optimize"], 45000);
+      if (!result.ok) {
+        return res.status(500).json({ error: result.error || "Graph optimization failed.", details: result });
+      }
+      return res.status(200).json({ message: "Graph memory optimized and measured successfully.", result });
     } 
     
     else if (action === "purge") {
       const targetDataset = dataset || "main_dataset";
-      const pyCommand = `python -c "import asyncio, devbrain_core; asyncio.run(devbrain_core.init_memory()); asyncio.run(devbrain_core.purge_memory('${targetDataset}'))"`;
-      exec(pyCommand, { cwd: parentDir, timeout: 20000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Purge error: ${error}`);
-          return res.status(500).json({ error: error.message });
-        }
-        return res.status(200).json({ message: `Memory dataset '${targetDataset}' purged successfully.` });
-      });
+      const result = await runPythonJson(parentDir, ["devbrain_bridge.py", "purge", "--dataset", targetDataset], 30000);
+      if (!result.ok) {
+        return res.status(400).json({ error: result.error || "Memory purge failed.", details: result });
+      }
+      return res.status(200).json({ message: `Memory dataset '${targetDataset}' purged successfully.`, result });
     } 
     
     else {

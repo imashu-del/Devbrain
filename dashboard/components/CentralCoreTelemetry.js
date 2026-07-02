@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const CentralCoreTelemetry = ({ isHarvesting = true }) => {
-  const [activeState, setActiveState] = useState(isHarvesting);
-
-  // Sync state if parent prop changes during data polling
-  useEffect(() => {
-    setActiveState(isHarvesting);
-  }, [isHarvesting]);
+  const [optimisticState, setOptimisticState] = useState(null);
+  const activeState = optimisticState ?? isHarvesting;
 
   const handleToggle = async () => {
     const newState = !activeState;
-    setActiveState(newState); // immediate visual feedback
+    setOptimisticState(newState); // immediate visual feedback
 
     try {
       const res = await fetch("/api/toggle-harvester", {

@@ -1,3 +1,4 @@
+import hashlib
 import os
 import time
 import asyncio
@@ -31,7 +32,7 @@ class CodebaseHarvesterHandler(FileSystemEventHandler):
 
         # Ignore specific directories (.git, node_modules, venv) and Cognee internal storage
         path_parts = filepath.split(os.sep)
-        ignore_dirs = {".git", "node_modules", "venv", ".cognee_system", ".cognee_data"}
+        ignore_dirs = {".git", "node_modules", "venv", ".cognee_system", ".cognee_data", ".data_storage", "memory_inbox"}
         if any(part in ignore_dirs for part in path_parts):
             return
 
@@ -71,16 +72,18 @@ class CodebaseHarvesterHandler(FileSystemEventHandler):
 
         # Extract modified line snippets from git diff
         added_lines = []
+        removed_lines = []
         if git_diff and not git_diff.startswith("Error"):
             for line in git_diff.splitlines():
-                # Lines added start with '+' (but not '+++')
                 if line.startswith("+") and not line.startswith("+++"):
                     added_lines.append(line[1:].strip())
+                elif line.startswith("-") and not line.startswith("---"):
+                    removed_lines.append(line[1:].strip())
 
         snippets = ", ".join(added_lines[:5]) if added_lines else "No modifications in git diff."
         timestamp = datetime.now().isoformat()
+        diff_hash = hashlib.sha256((git_diff or filepath).encode("utf-8", errors="ignore")).hexdigest()
 
-        # Bundle the collected information into a memory payload
         memory_payload = (
             f"[Codebase Watchdog Log]\n"
             f"File: {filename}\n"
@@ -90,10 +93,27 @@ class CodebaseHarvesterHandler(FileSystemEventHandler):
             f"Git Diff:\n{git_diff or 'No changes found in active git diff.'}"
         )
 
+        metadata = {
+            "file": filename,
+            "absolutePath": filepath,
+            "extension": ext.lower(),
+            "timestamp": timestamp,
+            "addedLines": added_lines[:25],
+            "removedLines": removed_lines[:25],
+            "diffHash": diff_hash,
+            "source": "watchdog",
+        }
+
         try:
-            # Store the log in the local Cognee graph database
-            await devbrain_core.store_memory(memory_payload)
-            print(f"[Harvester] Successfully synchronized and stored memory for {filename}.")
+            result = await devbrain_core.store_memory_result(
+                memory_payload,
+                event_type="code_change",
+                metadata=metadata,
+            )
+            if result.get("ok"):
+                print(f"[Harvester] Successfully synchronized and stored memory for {filename} ({result.get('source')}).")
+            else:
+                print(f"[Harvester] Memory store failed for {filename}: {result.get('error')}")
         except Exception as e:
             print(f"[Harvester] Error synchronizing memory for {filename}: {e}")
 

@@ -46,15 +46,22 @@ async def export_context() -> str:
     # Query local memory for specific sections
     print("[Exporter] Retrieving architectural constraints from local graph database...")
     arch_query = "What are the core system architecture constraints, features, and active structural boundaries?"
-    arch_info = await devbrain_core.query_memory(arch_query)
+    arch_result = await devbrain_core.query_memory_result(arch_query)
+    arch_info = arch_result.get("data") or ""
 
     print("[Exporter] Retrieving engineering decisions from local graph database...")
     decisions_query = "What are the recent engineering decisions, patterns, choices, and the 'why' behind them?"
-    decisions_info = await devbrain_core.query_memory(decisions_query)
+    decisions_result = await devbrain_core.query_memory_result(decisions_query)
+    decisions_info = decisions_result.get("data") or ""
 
     print("[Exporter] Retrieving active feature dependencies and blockers from local graph database...")
     blockers_query = "What are the active feature dependencies, structural bottlenecks, or coding blockers?"
-    blockers_info = await devbrain_core.query_memory(blockers_query)
+    blockers_result = await devbrain_core.query_memory_result(blockers_query)
+    blockers_info = blockers_result.get("data") or ""
+
+    recall_results = [arch_result, decisions_result, blockers_result]
+    recall_sources = ", ".join(sorted({result.get("source", "unknown") for result in recall_results}))
+    recall_errors = [result.get("error") for result in recall_results if result.get("error")]
 
     # Clean and set fallbacks if information is not found
     arch_content = arch_info.strip() if arch_info.strip() else "No architectural constraints or structural boundaries documented."
@@ -64,6 +71,10 @@ async def export_context() -> str:
     # Format the markdown manifest
     manifest_content = (
         f"# DEVBRAIN PROJECT MEMORY\n\n"
+        f"## Memory Source & Recall Status\n"
+        f"Source: {recall_sources}\n"
+        f"Fallback Used: {any(result.get('fallbackUsed') for result in recall_results)}\n"
+        f"Errors: {'; '.join(recall_errors) if recall_errors else 'None'}\n\n"
         f"## 🏗️ System Architecture & Constraints\n"
         f"{arch_content}\n\n"
         f"## ⚖️ Engineering Decisions (The 'Why')\n"

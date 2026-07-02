@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 
@@ -12,43 +12,38 @@ export default function handler(req, res) {
   const projectRoot = path.resolve(process.cwd(), "..");
   const devbrainScript = path.join(projectRoot, "devbrain.py");
 
-  // On Windows, wrap paths in double quotes in case of spaces in directories
-  const command = `python "${devbrainScript}" export`;
-
   return new Promise((resolve) => {
-    exec(command, { cwd: projectRoot, timeout: 45000, maxBuffer: 1024 * 1024 * 5 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Export execution error: ${error}`);
-        console.error(`Stderr: ${stderr}`);
-        res.status(500).json({ success: false, error: error.message, stderr });
+    const child = spawn("python", [devbrainScript, "export"], {
+      cwd: projectRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    const timer = setTimeout(() => {
+      child.kill();
+      res.status(500).json({ success: false, error: "Export timed out.", stderr });
+      resolve();
+    }, 45000);
+
+    child.stdout.on("data", (chunk) => { stdout += chunk.toString(); });
+    child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        res.status(500).json({ success: false, error: `Export exited with code ${code}.`, stdout, stderr });
         return resolve();
       }
 
-      console.log(`Export stdout: ${stdout}`);
-
-      // Verify the output file exists in dashboard/public
       const publicFilePath = path.join(process.cwd(), "public", "devbrain_context.md");
       if (fs.existsSync(publicFilePath)) {
         try {
           const content = fs.readFileSync(publicFilePath, "utf8");
-          res.status(200).json({ 
-            success: true, 
-            filePath: '/devbrain_context.md',
-            content: content
-          });
+          res.status(200).json({ success: true, filePath: '/devbrain_context.md', content, stdout });
         } catch (readErr) {
-          console.error(`Failed to read compiled context file: ${readErr}`);
-          res.status(200).json({ 
-            success: true, 
-            filePath: '/devbrain_context.md',
-            content: ''
-          });
+          res.status(200).json({ success: true, filePath: '/devbrain_context.md', content: '', stdout });
         }
       } else {
-        res.status(500).json({ 
-          success: false, 
-          error: "Compiled manifest file was not created in the public directory." 
-        });
+        res.status(500).json({ success: false, error: "Compiled manifest file was not created in the public directory.", stdout, stderr });
       }
       resolve();
     });

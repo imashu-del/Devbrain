@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import json
 import sqlite3
 import os
@@ -27,7 +28,9 @@ async def get_dashboard_data():
         if not has_key:
             os.environ["MOCK_EMBEDDING"] = "true"
             
-    await devbrain_core.init_memory()
+    with contextlib.redirect_stdout(sys.stderr):
+        await devbrain_core.init_memory()
+    health = devbrain_core.get_memory_health(include_schema=False)
     
     import cognee
     llm_model = cognee.config.config.llm_model
@@ -40,7 +43,9 @@ async def get_dashboard_data():
     # Query timeline context
     timeline_str = ""
     try:
-        timeline_str = await devbrain_core.query_memory('Codebase Watchdog Log, architectural constraints, engineering decisions')
+        with contextlib.redirect_stdout(sys.stderr):
+            recall_result = await devbrain_core.query_memory_result('Codebase Watchdog Log, architectural constraints, engineering decisions, DevBrain Memory Event')
+        timeline_str = recall_result.get('data') or ''
     except Exception as e:
         sys.stderr.write(f"Timeline query error: {e}\n")
         
@@ -91,6 +96,7 @@ async def get_dashboard_data():
         return entries
 
     parsed_entries = parse_timeline(timeline_str)
+    recall_status = locals().get("recall_result", {"ok": False, "source": "unavailable", "error": "Recall was not executed."})
     
     nodes = []
     edges = []
@@ -180,6 +186,17 @@ async def get_dashboard_data():
         "nodes": nodes,
         "edges": edges,
         "files": files,
+        "health": health,
+        "memoryStatus": {
+            "healthy": bool(health.get("healthy")) and bool(recall_status.get("ok", False)),
+            "source": recall_status.get("source", health.get("source", "unknown")),
+            "fallbackUsed": bool(recall_status.get("fallbackUsed")) or bool(health.get("mockMode")),
+            "lastError": recall_status.get("error"),
+            "nodeCount": health.get("counts", {}).get("nodes", len(nodes)),
+            "edgeCount": health.get("counts", {}).get("edges", len(edges)),
+            "dataCount": health.get("counts", {}).get("data", len(files)),
+        },
+        "datasets": health.get("datasets", []),
         "stitchProjectId": stitch_project_id,
         "cursorActive": cursor_active,
         "claudeActive": claude_active
