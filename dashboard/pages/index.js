@@ -140,7 +140,7 @@ export default function Home() {
       {/* TOP HEADER STATUS ROW (Minimalistic) */}
       <header className="w-full max-w-7xl px-8 flex justify-between items-center z-30 transition-cinematic">
         <div className="flex items-center gap-2 text-white tracking-wider font-sans relative -top-[10px] -left-[50px]">
-          <span className="text-[40px] font-normal">DevBrain Engine Cockpit</span>
+          <span className="text-[30px] font-normal">DevBrain Engine Cockpit</span>
         </div>
       </header>
 
