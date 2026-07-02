@@ -118,6 +118,7 @@ export const DottedGlowBackground = ({
     let raf = 0;
     let stopped = false;
     let isVisible = true;
+    let ro;
 
     const dpr = Math.min(Math.max(1, window.devicePixelRatio || 1), 2);
 
@@ -130,8 +131,6 @@ export const DottedGlowBackground = ({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const ro = new ResizeObserver(resize);
-    ro.observe(container);
     resize();
 
     // Precompute dot metadata for a medium-sized grid and regenerate on resize
@@ -230,6 +229,9 @@ export const DottedGlowBackground = ({
       resize();
       regenThrottled();
     };
+
+    ro = new ResizeObserver(handleResize);
+    ro.observe(container);
 
     const observer = new IntersectionObserver((entries) => {
       isVisible = entries[0]?.isIntersecting ?? true;

@@ -114,9 +114,9 @@ export default function Home() {
         className="absolute inset-0 z-0 pointer-events-none" 
         gap={16} 
         radius={1.2} 
-        color="rgba(255, 255, 255, 0.04)" 
-        glowColor="rgba(0, 242, 254, 0.25)" 
-        opacity={0.65} 
+        color="rgba(255, 255, 255, 0.35)" 
+        glowColor="rgba(0, 242, 254, 0.85)" 
+        opacity={0.8} 
       />
 
       <Head>
